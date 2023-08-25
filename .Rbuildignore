@@ -1,0 +1,7 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+testData
+testScripts
+data-raw
+unused
+.gitlab-ci.yml
