@@ -33,17 +33,12 @@ studyCols <- c("filename",
                "description",
                "submissionDate",
                "publicReleaseDate")
+sDDCols <- c("annotationValue",
+             "termSource",
+             "termAccession")
 
 
-# studyCols <- c("Study Identifier",
-#                "Study Title",
-#                "Study Description",
-#                "Study Submission Date",
-#                "Study Public Release Date",
-#                "Study File Name")
-# sDDCols <- c("Study Design Type",
-#              "Study Design Type Term Accession Number",
-#              "Study Design Type Term Source REF")
+
 # sPubsCols <- c("Study PubMed ID",
 #                "Study Publication DOI",
 #                "Study Publication Author List",

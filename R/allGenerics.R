@@ -180,3 +180,31 @@ setGeneric("study", function(x) standardGeneric("study"))
 #' @rdname study
 #' @export
 setGeneric("study<-", function(x, value) standardGeneric("study<-"))
+
+
+### sDD standard generics.
+
+#' Get and set sDD.
+#'
+#' Get and set the list of sDD data.frames in an object of
+#' \linkS4class{ISAjson}.
+#'
+#' @param x An object of class \linkS4class{ISAjson}.
+#'
+#' @return A list of data.frames containing the study design descriptors.
+#'
+#' @rdname sDD
+#' @export
+setGeneric("sDD", function(x) standardGeneric("sDD"))
+
+#' @param x An object of class \linkS4class{ISA}.
+#' @param value A list of data.frames containing the study design descriptors.
+#' In each data.frame at least the following columns are present:
+#' `r paste0("'", sDDCols, "'", collapse = ", ")`.
+#'
+#' @return The updated object of class \linkS4class{ISAjson}.
+#' @rdname sDD
+#' @export
+setGeneric("sDD<-", function(x, value) standardGeneric("sDD<-"))
+
+

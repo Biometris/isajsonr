@@ -93,18 +93,23 @@ setMethod("study<-", "ISAjson", function(x, value) {
 })
 
 
-#'
-#' ### sDD
-#'
-#' #' @rdname sDD
-#' setMethod("sDD", "ISA", function(x) x@sDD)
-#'
-#' #' @rdname sDD
-#' setMethod("sDD<-", "ISA", function(x, value) {
-#'   x@sDD <- value
-#'   validISAObject(x)
-#'   return(x)
-#' })
+### sDD
+
+#' @rdname sDD
+setMethod("sDD", "ISAjson", function(x) {
+  x@content$studies$studyDesignDescriptors
+})
+
+#' @rdname sDD
+setMethod("sDD<-", "ISAjson", function(x, value) {
+  x@content$studies$studyDesignDescriptors <- value
+  #validISAJSONObject(x)
+  return(x)
+})
+
+
+
+
 #'
 #' ### sPubs
 #'
