@@ -1,3 +1,103 @@
+### Minimum required columns for data.frames.
+oSRCols <- c("description",
+             "file",
+             "name",
+             "version")
+investCols <- c("identifier",
+                "title",
+                "description",
+                "submissionDate",
+                "publicReleaseDate")
+iPubsCols <- c("pubMedID",
+               "doi",
+               "authorList",
+               "title",
+               "annotationValue",
+               "termSource",
+               "termAccession")
+iContactCols <- c("id",
+                  "lastName",
+                  "firstName",
+                  "midInitials",
+                  "email",
+                  "phone",
+                  "fax",
+                  "address",
+                  "affiliation",
+                  "annotationValue",
+                  "termSource",
+                  "termAccession")
+
+
+# iContactsCols <- c("Investigation Person Last Name",
+#                    "Investigation Person First Name",
+#                    "Investigation Person Mid Initials",
+#                    "Investigation Person Email",
+#                    "Investigation Person Phone",
+#                    "Investigation Person Fax",
+#                    "Investigation Person Address",
+#                    "Investigation Person Affiliation",
+#                    "Investigation Person Roles",
+#                    "Investigation Person Roles Term Accession Number",
+#                    "Investigation Person Roles Term Source REF")
+# studyCols <- c("Study Identifier",
+#                "Study Title",
+#                "Study Description",
+#                "Study Submission Date",
+#                "Study Public Release Date",
+#                "Study File Name")
+# sDDCols <- c("Study Design Type",
+#              "Study Design Type Term Accession Number",
+#              "Study Design Type Term Source REF")
+# sPubsCols <- c("Study PubMed ID",
+#                "Study Publication DOI",
+#                "Study Publication Author List",
+#                "Study Publication Title",
+#                "Study Publication Status",
+#                "Study Publication Status Term Accession Number",
+#                "Study Publication Status Term Source REF")
+# sFactsCols <- c("Study Factor Name",
+#                 "Study Factor Type",
+#                 "Study Factor Type Term Accession Number",
+#                 "Study Factor Type Term Source REF")
+# sAssaysCols <- c("Study Assay Measurement Type",
+#                  "Study Assay Measurement Type Term Accession Number",
+#                  "Study Assay Measurement Type Term Source REF",
+#                  "Study Assay Technology Type",
+#                  "Study Assay Technology Type Term Accession Number",
+#                  "Study Assay Technology Type Term Source REF",
+#                  "Study Assay Technology Platform",
+#                  "Study Assay File Name")
+# sProtsCols <- c("Study Protocol Name",
+#                 "Study Protocol Type",
+#                 "Study Protocol Type Term Accession Number",
+#                 "Study Protocol Type Term Source REF",
+#                 "Study Protocol Description",
+#                 "Study Protocol URI",
+#                 "Study Protocol Version",
+#                 "Study Protocol Parameters Name",
+#                 "Study Protocol Parameters Name Term Accession Number",
+#                 "Study Protocol Parameters Name Term Source REF",
+#                 "Study Protocol Components Name",
+#                 "Study Protocol Components Type",
+#                 "Study Protocol Components Type Term Accession Number",
+#                 "Study Protocol Components Type Term Source REF")
+# sContactsCols <- c("Study Person Last Name",
+#                    "Study Person First Name",
+#                    "Study Person Mid Initials",
+#                    "Study Person Email",
+#                    "Study Person Phone",
+#                    "Study Person Fax",
+#                    "Study Person Address",
+#                    "Study Person Affiliation",
+#                    "Study Person Roles",
+#                    "Study Person Roles Term Accession Number",
+#                    "Study Person Roles Term Source REF")
+# sFilesCols <- c("Source Name",
+#                 "Term Source REF",
+#                 "Sample Name")
+# aFilesCols <- c()
+
 ### start helper functions ----
 
 checkCharacter <- function(...) {
@@ -33,15 +133,15 @@ dfBind <- function(dfList) {
   )
 }
 
-#' Helper function for creating data frames for slots in ISA object for
+#' Helper function for creating data.frames for slots in ISA object for
 #' JSON input format.
 #'
 #' @noRd
 #' @keywords internal
-createISASlotDataFrameJson <- function(file,
-                                       name,
-                                       cols) {
-  tempdf <- lapply(X = file[[name]], FUN = as.data.frame,
+createISAJsonDataFrame <- function(content,
+                                   name,
+                                   cols) {
+  tempdf <- lapply(X = content[[name]], FUN = as.data.frame,
                    stringsAsFactors = FALSE)
   tempdf <- do.call(what = dfBind, args = list(tempdf))
   rownames(tempdf) <- NULL
@@ -55,6 +155,15 @@ createISASlotDataFrameJson <- function(file,
   return(tempdf)
 }
 
+#' Helper function for converting data.frames to json like format.
+#'
+#' @noRd
+#' @keywords internal
+jsonDataFrameToList <- function(df) {
+  lapply (X = 1:nrow(df), FUN = function(i) {
+    as.list(df[i, ])
+  })
+}
 
 
 
