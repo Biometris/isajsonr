@@ -21,7 +21,7 @@ iPubs(x) <- value
 \item{value}{A data.frame containing the investigation publications
 information. A data.frame in which at least the following columns are
 present:
-`r paste0("'", iPubsCols, "'", collapse = ", ")`.}
+`r paste0("'", pubsCols, "'", collapse = ", ")`.}
 }
 \value{
 A data.frame containing the investigation publications information.

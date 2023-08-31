@@ -8,13 +8,13 @@ investCols <- c("identifier",
                 "description",
                 "submissionDate",
                 "publicReleaseDate")
-iPubsCols <- c("pubMedID",
-               "doi",
-               "authorList",
-               "title",
-               "annotationValue",
-               "termSource",
-               "termAccession")
+pubsCols <- c("pubMedID",
+              "doi",
+              "authorList",
+              "title",
+              "annotationValue",
+              "termSource",
+              "termAccession")
 iContactCols <- c("id",
                   "lastName",
                   "firstName",
@@ -39,13 +39,6 @@ sDDCols <- c("annotationValue",
 
 
 
-# sPubsCols <- c("Study PubMed ID",
-#                "Study Publication DOI",
-#                "Study Publication Author List",
-#                "Study Publication Title",
-#                "Study Publication Status",
-#                "Study Publication Status Term Accession Number",
-#                "Study Publication Status Term Source REF")
 # sFactsCols <- c("Study Factor Name",
 #                 "Study Factor Type",
 #                 "Study Factor Type Term Accession Number",

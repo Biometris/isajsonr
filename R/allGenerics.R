@@ -121,7 +121,7 @@ setGeneric("iPubs", function(x) standardGeneric("iPubs"))
 #' @param value A data.frame containing the investigation publications
 #' information. A data.frame in which at least the following columns are
 #' present:
-#' `r paste0("'", iPubsCols, "'", collapse = ", ")`.
+#' `r paste0("'", pubsCols, "'", collapse = ", ")`.
 #'
 #' @return The updated object of class \linkS4class{ISAjson}.
 #' @rdname iPubs
@@ -208,3 +208,27 @@ setGeneric("sDD", function(x) standardGeneric("sDD"))
 setGeneric("sDD<-", function(x, value) standardGeneric("sDD<-"))
 
 
+### sPubs standard generics.
+
+#' Get and set sPubs.
+#'
+#' Get and set the list of sPubs data.frames in an object of
+#' \linkS4class{ISAjson}.
+#'
+#' @param x An object of class \linkS4class{ISAjson}.
+#'
+#' @return A list of data.frames containing the study publications.
+#'
+#' @rdname sPubs
+#' @export
+setGeneric("sPubs", function(x) standardGeneric("sPubs"))
+
+#' @param x An object of class \linkS4class{ISAjson}.
+#' @param value A list of data.frames containing the study publications.
+#' In each data.frame at least the following columns are present:
+#' `r paste0("'", pubsCols, "'", collapse = ", ")`.
+#'
+#' @return The updated object of class \linkS4class{ISAjson}.
+#' @rdname sPubs
+#' @export
+setGeneric("sPubs<-", function(x, value) standardGeneric("sPubs<-"))
