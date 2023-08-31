@@ -27,19 +27,14 @@ iContactCols <- c("id",
                   "annotationValue",
                   "termSource",
                   "termAccession")
+studyCols <- c("filename",
+               "identifier",
+               "title",
+               "description",
+               "submissionDate",
+               "publicReleaseDate")
 
 
-# iContactsCols <- c("Investigation Person Last Name",
-#                    "Investigation Person First Name",
-#                    "Investigation Person Mid Initials",
-#                    "Investigation Person Email",
-#                    "Investigation Person Phone",
-#                    "Investigation Person Fax",
-#                    "Investigation Person Address",
-#                    "Investigation Person Affiliation",
-#                    "Investigation Person Roles",
-#                    "Investigation Person Roles Term Accession Number",
-#                    "Investigation Person Roles Term Source REF")
 # studyCols <- c("Study Identifier",
 #                "Study Title",
 #                "Study Description",

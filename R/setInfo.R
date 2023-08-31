@@ -76,19 +76,23 @@ setMethod("iContacts<-", "ISAjson", function(x, value) {
 })
 
 
+### study
 
-#'
-#' ### study
-#'
-#' #' @rdname study
-#' setMethod("study", "ISA", function(x) x@study)
-#'
-#' #' @rdname study
-#' setMethod("study<-", "ISA", function(x, value) {
-#'   x@study <- value
-#'   validISAObject(x)
-#'   return(x)
-#' })
+#' @rdname study
+setMethod("study", "ISAjson", function(x) {
+  data.frame(x@content$studies[studyCols])
+})
+
+#' @rdname study
+setMethod("study<-", "ISAjson", function(x, value) {
+  for (studyCol in studyCols) {
+    x@content$studies[[studyCol]] <- value[[studyCol]]
+  }
+  #validISAJSONObject(x)
+  return(x)
+})
+
+
 #'
 #' ### sDD
 #'
