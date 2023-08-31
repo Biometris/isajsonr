@@ -123,6 +123,22 @@ setMethod("sPubs<-", "ISAjson", function(x, value) {
 })
 
 
+### sFacts
+
+#' @rdname sFacts
+setMethod("sFacts", "ISAjson", function(x) {
+  x@content$studies$factors
+})
+
+#' @rdname sFacts
+setMethod("sFacts<-", "ISAjson", function(x, value) {
+  x@content$studies$factors <- value
+  #validISAJSONObject(x)
+  return(x)
+})
+
+
+
 #'
 #' ### sFacts
 #'

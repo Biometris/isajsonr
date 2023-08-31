@@ -197,7 +197,7 @@ setGeneric("study<-", function(x, value) standardGeneric("study<-"))
 #' @export
 setGeneric("sDD", function(x) standardGeneric("sDD"))
 
-#' @param x An object of class \linkS4class{ISA}.
+#' @param x An object of class \linkS4class{ISAjson}.
 #' @param value A list of data.frames containing the study design descriptors.
 #' In each data.frame at least the following columns are present:
 #' `r paste0("'", sDDCols, "'", collapse = ", ")`.
@@ -232,3 +232,29 @@ setGeneric("sPubs", function(x) standardGeneric("sPubs"))
 #' @rdname sPubs
 #' @export
 setGeneric("sPubs<-", function(x, value) standardGeneric("sPubs<-"))
+
+
+### sFacts standard generics.
+
+#' Get and set sFacts.
+#'
+#' Get and set the list of sFacts data.frames in an object of
+#' \linkS4class{ISAjson}.
+#'
+#' @param x An object of class \linkS4class{ISAjson}.
+#'
+#' @return A list of data.frames containing the study factors.
+#'
+#' @rdname sFacts
+#' @export
+setGeneric("sFacts", function(x) standardGeneric("sFacts"))
+
+#' @param x An object of class \linkS4class{ISA}.
+#' @param value A list of data.frames containing the study factors.
+#' In each data.frame at least the following columns are present:
+#' `r paste0("'", sFactsCols, "'", collapse = ", ")`.
+#'
+#' @return The updated object of class \linkS4class{ISAjson}.
+#' @rdname sFacts
+#' @export
+setGeneric("sFacts<-", function(x, value) standardGeneric("sFacts<-"))

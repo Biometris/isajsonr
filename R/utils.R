@@ -36,13 +36,13 @@ studyCols <- c("filename",
 sDDCols <- c("annotationValue",
              "termSource",
              "termAccession")
+sFactCols <- c("factorName",
+               "annotationValue",
+               "termSource",
+               "termAccession")
 
 
 
-# sFactsCols <- c("Study Factor Name",
-#                 "Study Factor Type",
-#                 "Study Factor Type Term Accession Number",
-#                 "Study Factor Type Term Source REF")
 # sAssaysCols <- c("Study Assay Measurement Type",
 #                  "Study Assay Measurement Type Term Accession Number",
 #                  "Study Assay Measurement Type Term Source REF",
