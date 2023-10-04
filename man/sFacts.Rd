@@ -16,7 +16,7 @@ sFacts(x) <- value
 \S4method{sFacts}{ISAjson}(x) <- value
 }
 \arguments{
-\item{x}{An object of class \linkS4class{ISA}.}
+\item{x}{An object of class \linkS4class{ISAjson}.}
 
 \item{value}{A list of data.frames containing the study factors.
 In each data.frame at least the following columns are present:

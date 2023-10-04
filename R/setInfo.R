@@ -138,55 +138,53 @@ setMethod("sFacts<-", "ISAjson", function(x, value) {
 })
 
 
+### sAssays
 
-#'
-#' ### sFacts
-#'
-#' #' @rdname sFacts
-#' setMethod("sFacts", "ISA", function(x) x@sFacts)
-#'
-#' #' @rdname sFacts
-#' setMethod("sFacts<-", "ISA", function(x, value) {
-#'   x@sFacts <- value
-#'   validISAObject(x)
-#'   return(x)
-#' })
-#'
-#' ### sAssays
-#'
-#' #' @rdname sAssays
-#' setMethod("sAssays", "ISA", function(x) x@sAssays)
-#'
-#' #' @rdname sAssays
-#' setMethod("sAssays<-", "ISA", function(x, value) {
-#'   x@sAssays <- value
-#'   validISAObject(x)
-#'   return(x)
-#' })
-#'
-#' ### sProts
-#'
-#' #' @rdname sProts
-#' setMethod("sProts", "ISA", function(x) x@sProts)
-#'
-#' #' @rdname sProts
-#' setMethod("sProts<-", "ISA", function(x, value) {
-#'   x@sProts <- value
-#'   validISAObject(x)
-#'   return(x)
-#' })
-#'
-#' ### sContacts
-#'
-#' #' @rdname sContacts
-#' setMethod("sContacts", "ISA", function(x) x@sContacts)
-#'
-#' #' @rdname sContacts
-#' setMethod("sContacts<-", "ISA", function(x, value) {
-#'   x@sContacts <- value
-#'   validISAObject(x)
-#'   return(x)
-#' })
+#' @rdname sAssays
+setMethod("sAssays", "ISAjson", function(x) {
+  data.frame(x@content$studies$assays[[1]][sAssaysCols])
+})
+
+#' @rdname sAssays
+setMethod("sAssays<-", "ISAjson", function(x, value) {
+  for (sAssaysCol in sAssaysCols) {
+    x@content$studies$assays[[1]][[sAssayCol]] <- value[[sAssayCol]]
+  }
+  #validISAJSONObject(x)
+  return(x)
+})
+
+
+### sProts
+
+#' @rdname sProts
+setMethod("sProts", "ISAjson", function(x) {
+  x@content$studies$protocols
+})
+
+#' @rdname sProts
+setMethod("sProts<-", "ISAjson", function(x, value) {
+  x@content$studies$protocols <- value
+  #validISAObject(x)
+  return(x)
+})
+
+
+### sContacts
+
+#' @rdname sContacts
+setMethod("sContacts", "ISAjson", function(x) {
+  x@content$studies$people
+})
+
+#' @rdname sContacts
+setMethod("sContacts<-", "ISAjson", function(x, value) {
+  x@content$studies$people <- value
+  #validISAJSONObject(x)
+  return(x)
+})
+
+
 #'
 #' ### sFiles
 #'
