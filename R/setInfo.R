@@ -148,7 +148,7 @@ setMethod("sAssays", "ISAjson", function(x) {
 #' @rdname sAssays
 setMethod("sAssays<-", "ISAjson", function(x, value) {
   for (sAssaysCol in sAssaysCols) {
-    x@content$studies$assays[[1]][[sAssayCol]] <- value[[sAssayCol]]
+    x@content$studies$assays[[1]][[sAssaysCol]] <- value[[sAssaysCol]]
   }
   #validISAJSONObject(x)
   return(x)
