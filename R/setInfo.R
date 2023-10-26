@@ -63,17 +63,23 @@ setMethod("oSR<-", "ISAjson", function(x, value) {
 
 #' @rdname iPubs
 setMethod("iPubs", "ISAjson", function(x) {
-  iPubDat <- x@content$publications[pubsCols]
-  iPubComments <- parseComments(x@content$publications$comments)
-  if (nrow(iPubComments) > 0) {
-    iPubDat <- cbind(iPubDat, iPubComments)
+  if (length(x@content$publications) == 0) {
+    iPubsDat <- createEmptyDat(pubsCols)
+  } else {
+    iPubsDat <- x@content$publications[pubsCols]
+    iPubsComments <- parseComments(x@content$publications$comments)
+    if (nrow(iPubsComments) > 0) {
+      iPubsDat <- cbind(iPubsDat, iPubsComments)
+    }
   }
-  return(iPubDat)
+  iPubsOntology <- parseOntologySource(x@content$publications)
+  iPubsDat <- cbind(iPubsDat, iPubsOntology)
+  return(iPubsDat)
 })
 
 #' @rdname iPubs
 setMethod("iPubs<-", "ISAjson", function(x, value) {
-  x@content$publications <- value[pubsCols]
+  x@content$publications <- value[c(pubsCols, ontologyAnnotationCols)]
   x@content$publications$comments <- deparseComments(value)
   #validISAJSONObject(x)
   return(x)
@@ -84,17 +90,23 @@ setMethod("iPubs<-", "ISAjson", function(x, value) {
 
 #' @rdname iContacts
 setMethod("iContacts", "ISAjson", function(x) {
-  iContactDat <- x@content$people[iContactCols]
-  iContactComments <- parseComments(x@content$people$comments)
-  if (nrow(iContactComments) > 0) {
-    iContactDat <- cbind(iContactComments, iContactComments)
+  if (length(x@content$people) == 0) {
+    iContactsDat <- createEmptyDat(iContactCols)
+  } else {
+    iContactsDat <- x@content$people[iContactCols]
+    iContactsComments <- parseComments(x@content$people$comments)
+    if (nrow(iContactsComments) > 0) {
+      iContactsDat <- cbind(iContactsDat, iContactsComments)
+    }
   }
-  return(iContactDat)
+  iContactsOntology <- parseOntologySource(x@content$people)
+  iContactsDat <- cbind(iContactsDat, iContactsOntology)
+  return(iContactsDat)
 })
 
 #' @rdname iContacts
 setMethod("iContacts<-", "ISAjson", function(x, value) {
-  x@content$people <- value[iContactCols]
+  x@content$people <- value[c(iContactCols, ontologyAnnotationCols)]
   x@content$people$comments <- deparseComments(value)
   #validISAJSONObject(x)
   return(x)
@@ -105,7 +117,12 @@ setMethod("iContacts<-", "ISAjson", function(x, value) {
 
 #' @rdname study
 setMethod("study", "ISAjson", function(x) {
-  data.frame(x@content$studies[studyCols])
+  studyDat <- data.frame(x@content$studies[studyCols])
+  studyComments <- parseComments(x@content$studies$comments)
+  if (nrow(studyComments) > 0) {
+    studyDat <- cbind(studyDat, studyComments)
+  }
+  return(studyDat)
 })
 
 #' @rdname study
@@ -113,6 +130,7 @@ setMethod("study<-", "ISAjson", function(x, value) {
   for (studyCol in studyCols) {
     x@content$studies[[studyCol]] <- value[[studyCol]]
   }
+  x@content$studies$comments <- deparseComments(value)
   #validISAJSONObject(x)
   return(x)
 })

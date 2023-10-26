@@ -11,10 +11,7 @@ investCols <- c("identifier",
 pubsCols <- c("pubMedID",
               "doi",
               "authorList",
-              "title",
-              "annotationValue",
-              "termSource",
-              "termAccession")
+              "title")
 iContactCols <- c("id",
                   "lastName",
                   "firstName",
@@ -23,10 +20,7 @@ iContactCols <- c("id",
                   "phone",
                   "fax",
                   "address",
-                  "affiliation",
-                  "annotationValue",
-                  "termSource",
-                  "termAccession")
+                  "affiliation")
 studyCols <- c("filename",
                "identifier",
                "title",
@@ -69,6 +63,10 @@ sContactsCols <- c("Study Person Last Name",
                    "Study Person Roles",
                    "Study Person Roles Term Accession Number",
                    "Study Person Roles Term Source REF")
+ontologyAnnotationCols <- c("annotationValue",
+                            "termSource",
+                            "termAccession")
+
 # sFilesCols <- c("Source Name",
 #                 "Term Source REF",
 #                 "Sample Name")
@@ -141,6 +139,18 @@ jsonDataFrameToList <- function(df) {
   })
 }
 
+
+#' Helper function for creating empty data.frame with column names.
+#'
+#' @noRd
+#' @keywords internal
+createEmptyDat <- function(cols) {
+  colMat <- matrix(nrow = 0, ncol = length(cols), dimnames = list(NULL, cols))
+  colDat <- as.data.frame(colMat)
+  return(colDat)
+}
+
+
 #' Helper function for parsing comments section.
 #'
 #' @noRd
@@ -177,6 +187,26 @@ deparseComments <- function(dat) {
       return(list())
     }
   })
+}
+
+#' Helper function for parsing ontology annotation.
+#'
+#' @noRd
+#' @keywords internal
+parseOntologySource <- function(dat,
+                                comments = FALSE) {
+  if (length(dat) == 0) {
+    ontAnnotDat <- createEmptyDat(ontologyAnnotationCols)
+  } else {
+    ontAnnotDat <- dat[ontologyAnnotationCols]
+    if (comments) {
+      ontAnnotComments <- parseComments(dat$comments)
+      if (nrow(ontAnnotComments) > 0) {
+        ontAnnotDat <- cbind(ontAnnotDat, ontAnnotComments)
+      }
+    }
+  }
+  return(ontAnnotDat)
 }
 
 
