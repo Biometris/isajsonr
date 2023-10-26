@@ -84,12 +84,18 @@ setMethod("iPubs<-", "ISAjson", function(x, value) {
 
 #' @rdname iContacts
 setMethod("iContacts", "ISAjson", function(x) {
-  x@content$people
+  iContactDat <- x@content$people[iContactCols]
+  iContactComments <- parseComments(x@content$people$comments)
+  if (nrow(iContactComments) > 0) {
+    iContactDat <- cbind(iContactComments, iContactComments)
+  }
+  return(iContactDat)
 })
 
 #' @rdname iContacts
 setMethod("iContacts<-", "ISAjson", function(x, value) {
-  x@content$people <- value
+  x@content$people <- value[iContactCols]
+  x@content$people$comments <- deparseComments(value)
   #validISAJSONObject(x)
   return(x)
 })
