@@ -63,12 +63,18 @@ setMethod("oSR<-", "ISAjson", function(x, value) {
 
 #' @rdname iPubs
 setMethod("iPubs", "ISAjson", function(x) {
-  x@content$publications
+  iPubDat <- x@content$publications[pubsCols]
+  iPubComments <- parseComments(x@content$publications$comments)
+  if (nrow(iPubComments) > 0) {
+    iPubDat <- cbind(iPubDat, iPubComments)
+  }
+  return(iPubDat)
 })
 
 #' @rdname iPubs
 setMethod("iPubs<-", "ISAjson", function(x, value) {
-  x@content$publications <- value
+  x@content$publications <- value[pubsCols]
+  x@content$publications$comments <- deparseComments(value)
   #validISAJSONObject(x)
   return(x)
 })
