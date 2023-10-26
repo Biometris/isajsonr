@@ -14,26 +14,17 @@ setMethod("isaPath<-", "ISAjson", function(x, value) {
   return(x)
 })
 
-### oSR
-
-#' @rdname oSR
-setMethod("oSR", "ISAjson", function(x) {
-  x@content$ontologySourceReferences
-})
-
-#' @rdname oSR
-setMethod("oSR<-", "ISAjson", function(x, value) {
-  x@content$ontologySourceReferences <- value
-  #validISAJSONObject(x)
-  return(x)
-})
-
 
 ### invest
 
 #' @rdname invest
 setMethod("invest", "ISAjson", function(x) {
-  data.frame(x@content[investCols])
+  investDat <- data.frame(x@content[investCols])
+  if (length(x@content$comments) > 0) {
+    investComments <- parseComments(x@content$comments)
+    investDat <- cbind(investDat, investComments)
+  }
+  return(investDat)
 })
 
 #' @rdname invest
@@ -41,6 +32,28 @@ setMethod("invest<-", "ISAjson", function(x, value) {
   for (investCol in investCols) {
     x@content[[investCol]] <- value[[investCol]]
   }
+  x@content$comments <- deparseComments(value)
+  #validISAJSONObject(x)
+  return(x)
+})
+
+
+### oSR
+
+#' @rdname oSR
+setMethod("oSR", "ISAjson", function(x) {
+  osrDat <- x@content$ontologySourceReferences[oSRCols]
+  oSRComments <- parseComments(x@content$ontologySourceReferences$comments)
+  if (nrow(oSRComments) > 0) {
+    osrDat <- cbind(osrDat, oSRComments)
+  }
+  return(osrDat)
+})
+
+#' @rdname oSR
+setMethod("oSR<-", "ISAjson", function(x, value) {
+  x@content$ontologySourceReferences <- value[oSRCols]
+  x@content$ontologySourceReferences$comments <- deparseComments(value)
   #validISAJSONObject(x)
   return(x)
 })

@@ -96,14 +96,14 @@ dfBind <- function(dfList) {
     return(data.frame())
   }
   ## Get variable names from all data.frames.
-  allNms <- unique(unlist(lapply(dfList, names)))
+  allNms <- unique(unlist(lapply(dfList, colnames)))
   ## rbind all data.frames setting values for missing columns to NA.
   do.call(rbind,
           c(lapply(X = dfList, FUN = function(x) {
-            nwDat <- sapply(X = setdiff(allNms, names(x)), FUN = function(y) {
-              NA
-            })
-            data.frame(c(x, nwDat), check.names = FALSE,
+            nwCols <- setdiff(allNms, colnames(x))
+            nwDat <- as.data.frame(matrix(nrow = nrow(x), ncol = length(nwCols),
+                                          dimnames = list(NULL, nwCols)))
+            data.frame(cbind(x, nwDat), check.names = FALSE,
                        stringsAsFactors = FALSE)
           }), make.row.names = FALSE)
   )
@@ -138,6 +138,44 @@ createISAJsonDataFrame <- function(content,
 jsonDataFrameToList <- function(df) {
   lapply (X = 1:nrow(df), FUN = function(i) {
     as.list(df[i, ])
+  })
+}
+
+#' Helper function for parsing comments section.
+#'
+#' @noRd
+#' @keywords internal
+parseComments <- function(comments) {
+  commentDatLst <- lapply(X = comments, FUN = function(commentDat) {
+    if (length(commentDat) > 0) {
+      matrix(data = commentDat$value, nrow = 1,
+             dimnames = list(NULL, paste0("Comment[", commentDat$name, "]")))
+    }
+  })
+  dfBind(commentDatLst)
+}
+
+#' Helper function for deparsing comments section.
+#'
+#' @noRd
+#' @keywords internal
+deparseComments <- function(dat) {
+  commentCols <- colnames(dat)[startsWith(colnames(dat), "Comment[") &
+                                 endsWith(colnames(dat), "]")]
+  if (length(commentCols) > 0) {
+    commentNames <- gsub(pattern = "Comment[", replacement =  "",
+                         x = commentCols, fixed = TRUE)
+    commentNames <- substring(commentNames, first = 1,
+                              last = nchar(commentNames) - 1)
+  }
+  lapply(X = 1:nrow(dat), FUN = function(i) {
+    if (length(commentCols) > 0) {
+      return(data.frame(name = commentNames,
+                        value = unlist(dat[i, commentCols]),
+                        row.names = NULL))
+    } else {
+      return(list())
+    }
   })
 }
 
