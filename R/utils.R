@@ -194,20 +194,36 @@ deparseComments <- function(dat) {
 #' @noRd
 #' @keywords internal
 parseOntologySource <- function(dat,
-                                comments = FALSE) {
+                                name) {
   if (length(dat) == 0) {
     ontAnnotDat <- createEmptyDat(ontologyAnnotationCols)
   } else {
     ontAnnotDat <- dat[ontologyAnnotationCols]
-    if (comments) {
-      ontAnnotComments <- parseComments(dat$comments)
-      if (nrow(ontAnnotComments) > 0) {
-        ontAnnotDat <- cbind(ontAnnotDat, ontAnnotComments)
-      }
+    ontAnnotComments <- parseComments(dat[[paste0(name, "comments")]])
+    if (nrow(ontAnnotComments) > 0) {
+      ontAnnotDat <- cbind(ontAnnotDat, ontAnnotComments)
     }
+  }
+  colnames(ontAnnotDat) <- paste0(name, colnames(ontAnnotDat))
+  return(ontAnnotDat)
+}
+
+#' Helper function for deparsing ontology annotation.
+#'
+#' @noRd
+#' @keywords internal
+deparseOntologySource <- function(dat,
+                                  name) {
+  if (nrow(dat) > 0) {
+    ontAnnotCols <- colnames(dat)[startsWith(colnames(dat), prefix = name)]
+    ontAnnotDat <- dat[ontAnnotCols]
+    colnames(ontAnnotDat) <- substring(text = colnames(ontAnnotDat),
+                                       first = nchar(name) + 1)
+    ontAnnotDat$comments <- deparseComments(ontAnnotDat)
   }
   return(ontAnnotDat)
 }
+
 
 
 

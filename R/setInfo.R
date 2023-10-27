@@ -72,14 +72,17 @@ setMethod("iPubs", "ISAjson", function(x) {
       iPubsDat <- cbind(iPubsDat, iPubsComments)
     }
   }
-  iPubsOntology <- parseOntologySource(x@content$publications)
+  iPubsOntology <- parseOntologySource(x@content$publications,
+                                       name = "status")
   iPubsDat <- cbind(iPubsDat, iPubsOntology)
   return(iPubsDat)
 })
 
 #' @rdname iPubs
 setMethod("iPubs<-", "ISAjson", function(x, value) {
-  x@content$publications <- value[c(pubsCols, ontologyAnnotationCols)]
+  iPubsDat <- cbind(value[pubsCols],
+                    deparseOntologySource(value, name = "status"))
+  x@content$publications <- iPubsDat
   x@content$publications$comments <- deparseComments(value)
   #validISAJSONObject(x)
   return(x)
@@ -99,14 +102,17 @@ setMethod("iContacts", "ISAjson", function(x) {
       iContactsDat <- cbind(iContactsDat, iContactsComments)
     }
   }
-  iContactsOntology <- parseOntologySource(x@content$people)
+  iContactsOntology <- parseOntologySource(x@content$people,
+                                           name = "roles")
   iContactsDat <- cbind(iContactsDat, iContactsOntology)
   return(iContactsDat)
 })
 
 #' @rdname iContacts
 setMethod("iContacts<-", "ISAjson", function(x, value) {
-  x@content$people <- value[c(iContactCols, ontologyAnnotationCols)]
+  iPubsDat <- cbind(value[iContactCols],
+                    deparseOntologySource(value, name = "roles"))
+  x@content$people <- iPubsDat
   x@content$people$comments <- deparseComments(value)
   #validISAJSONObject(x)
   return(x)
