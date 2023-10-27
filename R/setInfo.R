@@ -94,9 +94,9 @@ setMethod("iPubs<-", "ISAjson", function(x, value) {
 #' @rdname iContacts
 setMethod("iContacts", "ISAjson", function(x) {
   if (length(x@content$people) == 0) {
-    iContactsDat <- createEmptyDat(iContactCols)
+    iContactsDat <- createEmptyDat(contactCols)
   } else {
-    iContactsDat <- x@content$people[iContactCols]
+    iContactsDat <- x@content$people[contactCols]
     iContactsComments <- parseComments(x@content$people$comments)
     if (nrow(iContactsComments) > 0) {
       iContactsDat <- cbind(iContactsDat, iContactsComments)
@@ -110,7 +110,7 @@ setMethod("iContacts", "ISAjson", function(x) {
 
 #' @rdname iContacts
 setMethod("iContacts<-", "ISAjson", function(x, value) {
-  iPubsDat <- cbind(value[iContactCols],
+  iPubsDat <- cbind(value[contactCols],
                     deparseOntologySource(value, name = "roles"))
   x@content$people <- iPubsDat
   x@content$people$comments <- deparseComments(value)
@@ -161,12 +161,36 @@ setMethod("sDD<-", "ISAjson", function(x, value) {
 
 #' @rdname sPubs
 setMethod("sPubs", "ISAjson", function(x) {
-  x@content$studies$publications
+  sPubsList <- lapply(X = x@content$studies$publications,
+                      FUN = function(dat) {
+                        if (length(dat) == 0) {
+                          sPubsDat <- createEmptyDat(pubsCols)
+                        } else {
+                          sPubsDat <- dat[pubsCols]
+                          sPubsComments <- parseComments(dat$comments)
+                          if (nrow(sPubsComments) > 0) {
+                            sPubsDat <- cbind(sPubsDat, sPubsComments)
+                          }
+                        }
+                        sPubsOntology <- parseOntologySource(dat,
+                                                             name = "status")
+                        sPubsDat <- cbind(sPubsDat, sPubsOntology)
+                        return(sPubsDat)
+                      })
+  return(sPubsList)
 })
 
 #' @rdname sPubs
 setMethod("sPubs<-", "ISAjson", function(x, value) {
-  x@content$studies$publications <- value
+  sPubsLst <- lapply(X = value, FUN = function(dat) {
+    sPubsDat <- cbind(dat[pubsCols],
+                          deparseOntologySource(dat, name = "status"))
+  })
+  x@content$studies$publications <- sPubsLst
+  for (i in seq_along(value)) {
+    sPubsCommentDat <- deparseComments(value[[i]])
+    x@content$studies$publications[[i]]$comments <- sPubsCommentDat
+  }
   #validISAJSONObject(x)
   return(x)
 })
@@ -223,12 +247,36 @@ setMethod("sProts<-", "ISAjson", function(x, value) {
 
 #' @rdname sContacts
 setMethod("sContacts", "ISAjson", function(x) {
-  x@content$studies$people
+  sContactsLst <- lapply(X = x@content$studies$people,
+                         FUN = function(dat) {
+                           if (length(dat) == 0) {
+                             sContactsDat <- createEmptyDat(contactCols)
+                           } else {
+                             sContactsDat <- dat[contactCols]
+                             sContactsComments <- parseComments(dat$comments)
+                             if (nrow(sContactsComments) > 0) {
+                               sContactsDat <- cbind(sContactsDat, sContactsComments)
+                             }
+                           }
+                           sContactsOntology <- parseOntologySource(dat,
+                                                                    name = "roles")
+                           sContactsDat <- cbind(sContactsDat, sContactsOntology)
+                           return(sContactsDat)
+                         })
+  return(sContactsLst)
 })
 
 #' @rdname sContacts
 setMethod("sContacts<-", "ISAjson", function(x, value) {
-  x@content$studies$people <- value
+  sContactsLst <- lapply(X = value, FUN = function(dat) {
+    sContactsDat <- cbind(dat[contactCols],
+                          deparseOntologySource(dat, name = "roles"))
+  })
+  x@content$studies$people <- sContactsLst
+  for (i in seq_along(value)) {
+    sContactCommentDat <- deparseComments(value[[i]])
+    x@content$studies$people[[i]]$comments <- sContactCommentDat
+  }
   #validISAJSONObject(x)
   return(x)
 })
