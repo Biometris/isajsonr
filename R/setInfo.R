@@ -200,12 +200,36 @@ setMethod("sPubs<-", "ISAjson", function(x, value) {
 
 #' @rdname sFacts
 setMethod("sFacts", "ISAjson", function(x) {
-  x@content$studies$factors
+  sFactsList <- lapply(X = x@content$studies$factors,
+                      FUN = function(dat) {
+                        if (length(dat) == 0) {
+                          sFactsDat <- createEmptyDat(sFactCols)
+                        } else {
+                          sFactsDat <- dat[sFactCols]
+                          sFactsComments <- parseComments(dat$comments)
+                          if (nrow(sFactsComments) > 0) {
+                            sFactsDat <- cbind(sFactsDat, sFactsComments)
+                          }
+                        }
+                        sFactsOntology <- parseOntologySource(dat,
+                                                             name = "factorType")
+                        sFactsDat <- cbind(sFactsDat, sFactsOntology)
+                        return(sFactsDat)
+                      })
+  return(sFactsList)
 })
 
 #' @rdname sFacts
 setMethod("sFacts<-", "ISAjson", function(x, value) {
-  x@content$studies$factors <- value
+  sFactsLst <- lapply(X = value, FUN = function(dat) {
+    sFactsDat <- cbind(dat[sFactCols],
+                      deparseOntologySource(dat, name = "factorType"))
+  })
+  x@content$studies$factors <- sFactsLst
+  for (i in seq_along(value)) {
+    sFactsCommentDat <- deparseComments(value[[i]])
+    x@content$studies$factors[[i]]$comments <- sFactsCommentDat
+  }
   #validISAJSONObject(x)
   return(x)
 })

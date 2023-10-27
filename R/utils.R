@@ -30,10 +30,8 @@ studyCols <- c("filename",
 sDDCols <- c("annotationValue",
              "termSource",
              "termAccession")
-sFactCols <- c("factorName",
-               "annotationValue",
-               "termSource",
-               "termAccession")
+sFactCols <- c("id",
+               "factorName")
 sAssaysCols <- c("measurementType",
                  "technologyType",
                  "technologyPlatform",
