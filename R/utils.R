@@ -62,7 +62,8 @@ sContactsCols <- c("Study Person Last Name",
                    "Study Person Roles",
                    "Study Person Roles Term Accession Number",
                    "Study Person Roles Term Source REF")
-ontologyAnnotationCols <- c("annotationValue",
+ontologyAnnotationCols <- c("id",
+                            "annotationValue",
                             "termSource",
                             "termAccession")
 
