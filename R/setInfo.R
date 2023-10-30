@@ -146,12 +146,15 @@ setMethod("study<-", "ISAjson", function(x, value) {
 
 #' @rdname sDD
 setMethod("sDD", "ISAjson", function(x) {
-  x@content$studies$studyDesignDescriptors
+  sDDLst <- lapply(X = x@content$studies$studyDesignDescriptors,
+                   FUN = parseOntologySource, name = "")
+  return(sDDLst)
 })
 
 #' @rdname sDD
 setMethod("sDD<-", "ISAjson", function(x, value) {
-  x@content$studies$studyDesignDescriptors <- value
+  sDDLst <- lapply(X = value, FUN = parseOntologySource, name = "")
+  x@content$studies$publications <- sDDLst
   #validISAJSONObject(x)
   return(x)
 })
@@ -161,30 +164,30 @@ setMethod("sDD<-", "ISAjson", function(x, value) {
 
 #' @rdname sPubs
 setMethod("sPubs", "ISAjson", function(x) {
-  sPubsList <- lapply(X = x@content$studies$publications,
-                      FUN = function(dat) {
-                        if (length(dat) == 0) {
-                          sPubsDat <- createEmptyDat(pubsCols)
-                        } else {
-                          sPubsDat <- dat[pubsCols]
-                          sPubsComments <- parseComments(dat$comments)
-                          if (nrow(sPubsComments) > 0) {
-                            sPubsDat <- cbind(sPubsDat, sPubsComments)
-                          }
-                        }
-                        sPubsOntology <- parseOntologySource(dat,
-                                                             name = "status")
-                        sPubsDat <- cbind(sPubsDat, sPubsOntology)
-                        return(sPubsDat)
-                      })
-  return(sPubsList)
+  sPubsLst <- lapply(X = x@content$studies$publications,
+                     FUN = function(dat) {
+                       if (length(dat) == 0) {
+                         sPubsDat <- createEmptyDat(pubsCols)
+                       } else {
+                         sPubsDat <- dat[pubsCols]
+                         sPubsComments <- parseComments(dat$comments)
+                         if (nrow(sPubsComments) > 0) {
+                           sPubsDat <- cbind(sPubsDat, sPubsComments)
+                         }
+                       }
+                       sPubsOntology <- parseOntologySource(dat,
+                                                            name = "status")
+                       sPubsDat <- cbind(sPubsDat, sPubsOntology)
+                       return(sPubsDat)
+                     })
+  return(sPubsLst)
 })
 
 #' @rdname sPubs
 setMethod("sPubs<-", "ISAjson", function(x, value) {
   sPubsLst <- lapply(X = value, FUN = function(dat) {
     sPubsDat <- cbind(dat[pubsCols],
-                          deparseOntologySource(dat, name = "status"))
+                      deparseOntologySource(dat, name = "status"))
   })
   x@content$studies$publications <- sPubsLst
   for (i in seq_along(value)) {
@@ -200,7 +203,7 @@ setMethod("sPubs<-", "ISAjson", function(x, value) {
 
 #' @rdname sFacts
 setMethod("sFacts", "ISAjson", function(x) {
-  sFactsList <- lapply(X = x@content$studies$factors,
+  sFactsLst <- lapply(X = x@content$studies$factors,
                       FUN = function(dat) {
                         if (length(dat) == 0) {
                           sFactsDat <- createEmptyDat(sFactCols)
@@ -212,18 +215,18 @@ setMethod("sFacts", "ISAjson", function(x) {
                           }
                         }
                         sFactsOntology <- parseOntologySource(dat,
-                                                             name = "factorType")
+                                                              name = "factorType")
                         sFactsDat <- cbind(sFactsDat, sFactsOntology)
                         return(sFactsDat)
                       })
-  return(sFactsList)
+  return(sFactsLst)
 })
 
 #' @rdname sFacts
 setMethod("sFacts<-", "ISAjson", function(x, value) {
   sFactsLst <- lapply(X = value, FUN = function(dat) {
     sFactsDat <- cbind(dat[sFactCols],
-                      deparseOntologySource(dat, name = "factorType"))
+                       deparseOntologySource(dat, name = "factorType"))
   })
   x@content$studies$factors <- sFactsLst
   for (i in seq_along(value)) {
