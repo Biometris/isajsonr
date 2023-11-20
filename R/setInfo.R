@@ -72,7 +72,7 @@ setMethod("iPubs", "ISAjson", function(x) {
       iPubsDat <- cbind(iPubsDat, iPubsComments)
     }
   }
-  iPubsOntology <- parseOntologySource(x@content$publications,
+  iPubsOntology <- parseOntologySource(x@content$publications$status,
                                        name = "status")
   iPubsDat <- cbind(iPubsDat, iPubsOntology)
   return(iPubsDat)
@@ -80,9 +80,10 @@ setMethod("iPubs", "ISAjson", function(x) {
 
 #' @rdname iPubs
 setMethod("iPubs<-", "ISAjson", function(x, value) {
-  iPubsDat <- cbind(value[pubsCols],
-                    deparseOntologySource(value, name = "status"))
+  iPubsDat <- value[pubsCols]
+  iPubsOntology <- deparseOntologySource(value, name = "status")
   x@content$publications <- iPubsDat
+  x@content$publications$status <- iPubsOntology
   x@content$publications$comments <- deparseComments(value)
   #validISAJSONObject(x)
   return(x)
@@ -102,21 +103,23 @@ setMethod("iContacts", "ISAjson", function(x) {
       iContactsDat <- cbind(iContactsDat, iContactsComments)
     }
   }
-  iContactsOntology <- parseOntologySource(x@content$people,
-                                           name = "roles")
+  iContactsOntology <- parseOntologySourceLst(x@content$people$roles,
+                                              name = "roles")
   iContactsDat <- cbind(iContactsDat, iContactsOntology)
   return(iContactsDat)
 })
 
 #' @rdname iContacts
 setMethod("iContacts<-", "ISAjson", function(x, value) {
-  iPubsDat <- cbind(value[contactCols],
-                    deparseOntologySource(value, name = "roles"))
-  x@content$people <- iPubsDat
+  iContactsDat <- value[contactCols]
+  iContactsOntology <- deparseOntologySource(value, name = "roles")
+  x@content$people <- iContactsDat
+  x@content$people$roles <- iContactsOntology
   x@content$people$comments <- deparseComments(value)
   #validISAJSONObject(x)
   return(x)
 })
+
 
 
 ### study
@@ -153,8 +156,8 @@ setMethod("sDD", "ISAjson", function(x) {
 
 #' @rdname sDD
 setMethod("sDD<-", "ISAjson", function(x, value) {
-  sDDLst <- lapply(X = value, FUN = parseOntologySource, name = "")
-  x@content$studies$publications <- sDDLst
+  sDDLst <- lapply(X = value, FUN = deparseOntologySource, name = "")
+  x@content$studies$studyDesignDescriptors <- sDDLst
   #validISAJSONObject(x)
   return(x)
 })
@@ -175,7 +178,7 @@ setMethod("sPubs", "ISAjson", function(x) {
                            sPubsDat <- cbind(sPubsDat, sPubsComments)
                          }
                        }
-                       sPubsOntology <- parseOntologySource(dat,
+                       sPubsOntology <- parseOntologySource(dat$status,
                                                             name = "status")
                        sPubsDat <- cbind(sPubsDat, sPubsOntology)
                        return(sPubsDat)
@@ -186,86 +189,16 @@ setMethod("sPubs", "ISAjson", function(x) {
 #' @rdname sPubs
 setMethod("sPubs<-", "ISAjson", function(x, value) {
   sPubsLst <- lapply(X = value, FUN = function(dat) {
-    sPubsDat <- cbind(dat[pubsCols],
-                      deparseOntologySource(dat, name = "status"))
+    sPubsDat <- dat[pubsCols]
   })
   x@content$studies$publications <- sPubsLst
   for (i in seq_along(value)) {
     sPubsCommentDat <- deparseComments(value[[i]])
     x@content$studies$publications[[i]]$comments <- sPubsCommentDat
+    sPubsOntology <- deparseOntologySource(value[[i]], name = "status")
+    x@content$studies$publications[[i]]$status <- sPubsOntology
   }
   #validISAJSONObject(x)
-  return(x)
-})
-
-
-### sFacts
-
-#' @rdname sFacts
-setMethod("sFacts", "ISAjson", function(x) {
-  sFactsLst <- lapply(X = x@content$studies$factors,
-                      FUN = function(dat) {
-                        if (length(dat) == 0) {
-                          sFactsDat <- createEmptyDat(sFactCols)
-                        } else {
-                          sFactsDat <- dat[sFactCols]
-                          sFactsComments <- parseComments(dat$comments)
-                          if (nrow(sFactsComments) > 0) {
-                            sFactsDat <- cbind(sFactsDat, sFactsComments)
-                          }
-                        }
-                        sFactsOntology <- parseOntologySource(dat,
-                                                              name = "factorType")
-                        sFactsDat <- cbind(sFactsDat, sFactsOntology)
-                        return(sFactsDat)
-                      })
-  return(sFactsLst)
-})
-
-#' @rdname sFacts
-setMethod("sFacts<-", "ISAjson", function(x, value) {
-  sFactsLst <- lapply(X = value, FUN = function(dat) {
-    sFactsDat <- cbind(dat[sFactCols],
-                       deparseOntologySource(dat, name = "factorType"))
-  })
-  x@content$studies$factors <- sFactsLst
-  for (i in seq_along(value)) {
-    sFactsCommentDat <- deparseComments(value[[i]])
-    x@content$studies$factors[[i]]$comments <- sFactsCommentDat
-  }
-  #validISAJSONObject(x)
-  return(x)
-})
-
-
-### sAssays
-
-#' @rdname sAssays
-setMethod("sAssays", "ISAjson", function(x) {
-  data.frame(x@content$studies$assays[[1]][sAssaysCols])
-})
-
-#' @rdname sAssays
-setMethod("sAssays<-", "ISAjson", function(x, value) {
-  for (sAssaysCol in sAssaysCols) {
-    x@content$studies$assays[[1]][[sAssaysCol]] <- value[[sAssaysCol]]
-  }
-  #validISAJSONObject(x)
-  return(x)
-})
-
-
-### sProts
-
-#' @rdname sProts
-setMethod("sProts", "ISAjson", function(x) {
-  x@content$studies$protocols
-})
-
-#' @rdname sProts
-setMethod("sProts<-", "ISAjson", function(x, value) {
-  x@content$studies$protocols <- value
-  #validISAObject(x)
   return(x)
 })
 
@@ -285,8 +218,8 @@ setMethod("sContacts", "ISAjson", function(x) {
                                sContactsDat <- cbind(sContactsDat, sContactsComments)
                              }
                            }
-                           sContactsOntology <- parseOntologySource(dat,
-                                                                    name = "roles")
+                           sContactsOntology <- parseOntologySourceLst(dat$roles,
+                                                                       name = "roles")
                            sContactsDat <- cbind(sContactsDat, sContactsOntology)
                            return(sContactsDat)
                          })
@@ -296,18 +229,171 @@ setMethod("sContacts", "ISAjson", function(x) {
 #' @rdname sContacts
 setMethod("sContacts<-", "ISAjson", function(x, value) {
   sContactsLst <- lapply(X = value, FUN = function(dat) {
-    sContactsDat <- cbind(dat[contactCols],
-                          deparseOntologySource(dat, name = "roles"))
+    sContactsDat <- dat[contactCols]
   })
   x@content$studies$people <- sContactsLst
   for (i in seq_along(value)) {
-    sContactCommentDat <- deparseComments(value[[i]])
-    x@content$studies$people[[i]]$comments <- sContactCommentDat
+    sContactsCommentDat <- deparseComments(value[[i]])
+    x@content$studies$people[[i]]$comments <- sContactsCommentDat
+    sContactsOntology <- deparseOntologySource(value[[i]], name = "roles")
+    x@content$studies$people[[i]]$roles <- sContactsOntology
+
   }
   #validISAJSONObject(x)
   return(x)
 })
 
+
+#' @rdname sFacts
+setMethod("sFacts", "ISAjson", function(x) {
+  sFactsLst <- lapply(X = x@content$studies$factors,
+                      FUN = function(dat) {
+                        if (length(dat) == 0) {
+                          sFactsDat <- createEmptyDat(sFactCols)
+                        } else {
+                          sFactsDat <- dat[sFactCols]
+                          sFactsComments <- parseComments(dat$comments)
+                          if (nrow(sFactsComments) > 0) {
+                            sFactsDat <- cbind(sFactsDat, sFactsComments)
+                          }
+                        }
+                        sFactsOntology <- parseOntologySource(dat$factorType,
+                                                              name = "factorType")
+                        sFactsDat <- cbind(sFactsDat, sFactsOntology)
+                        return(sFactsDat)
+                      })
+  return(sFactsLst)
+})
+
+#' @rdname sFacts
+setMethod("sFacts<-", "ISAjson", function(x, value) {
+  sFactsLst <- lapply(X = value, FUN = function(dat) {
+    sFactsDat <- dat[sFactCols]
+  })
+  x@content$studies$factors <- sFactsLst
+  for (i in seq_along(value)) {
+    sFactsCommentDat <- deparseComments(value[[i]])
+    x@content$studies$factors[[i]]$comments <- sFactsCommentDat
+    sFactsOntology <- deparseOntologySource(value[[i]], name = "factorType")
+    x@content$studies$factors[[i]]$factorType <- sFactsOntology
+
+  }
+  #validISAJSONObject(x)
+  return(x)
+})
+
+
+
+### sAssays
+
+#' @rdname sAssays
+setMethod("sAssays", "ISAjson", function(x) {
+  sAssaysLst <- lapply(X = x@content$studies$assays,
+                       FUN = function(dat) {
+                         if (length(dat) == 0) {
+                           sAssaysDat <- createEmptyDat(sAssaysCols)
+                         } else {
+                           sAssaysDat <- dat[sAssaysCols]
+                           sAssaysComments <- parseComments(dat$comments)
+                           if (nrow(sAssaysComments) > 0) {
+                             sAssaysDat <- cbind(sAssaysDat, sAssaysComments)
+                           }
+                         }
+                         sAssaysMeasOnt <- parseOntologySource(dat$measurementType,
+                                                               name = "measurementType")
+                         sAssaysDat <- cbind(sAssaysDat, sAssaysMeasOnt)
+                         sAssaysTechOnt <- parseOntologySource(dat$technologyType,
+                                                               name = "technologyType")
+                         sAssaysDat <- cbind(sAssaysDat, sAssaysTechOnt)
+                         return(sAssaysDat)
+                       })
+})
+
+#' @rdname sAssays
+setMethod("sAssays<-", "ISAjson", function(x, value) {
+  sAssaysLst <- lapply(X = value, FUN = function(dat) {
+    sAssaysDat <- dat[sAssaysCols]
+  })
+  x@content$studies$assays <- sAssaysLst
+  for (i in seq_along(value)) {
+    sAssaysCommentDat <- deparseComments(value[[i]])
+    x@content$studies$factors[[i]]$comments <- sAssaysCommentDat
+    sAssaysOntology <- deparseOntologySource(value[[i]], name = "measurementType")
+    x@content$studies$factors[[i]]$measurementType <- sAssaysOntology
+
+  }
+  #validISAJSONObject(x)
+  return(x)
+})
+
+
+
+
+
+
+
+#' ### sProts
+#'
+#' #' @rdname sProts
+#' setMethod("sProts", "ISAjson", function(x) {
+#'   sProtsLst <- lapply(X = x@content$studies$protocols,
+#'                       FUN = function(dat) {
+#'                         if (length(dat) == 0) {
+#'                           sProtsDat <- createEmptyDat(sProtsCols)
+#'                         } else {
+#'                           sProtsDat <- dat[sProtsCols]
+#'                           sProtsComments <- parseComments(dat$comments)
+#'                           if (nrow(sProtsComments) > 0) {
+#'                             sProtsDat <- cbind(sProtsDat, sProtsComments)
+#'                           }
+#'                         }
+#'                         sProtsOntology <- parseOntologySource(dat$protocolType,
+#'                                                               name = "protocolType")
+#'                         sProtsDat$protocolType <- sProtsOntology
+#'                         sProtsParamsDat <- parseProtocolParams(dat$parameters)
+#'                         sProtsDat <- cbind(sProtsDat, sProtsParamsDat)
+#'                         return(sProtsDat)
+#'                       })
+#'   return(sProtsLst)
+#' })
+#'
+#' #' @rdname sProts
+#' setMethod("sProts<-", "ISAjson", function(x, value) {
+#'   sProtsLst <- lapply(X = value, FUN = function(dat) {
+#'     sProtsDat <- cbind(dat[sProtsCols],
+#'                        deparseOntologySource(dat, name = "protocolType"))
+#'   })
+#'   x@content$studies$protocols <- sProtsLst
+#'   for (i in seq_along(value)) {
+#'     sProtsCommentDat <- deparseComments(value[[i]])
+#'     x@content$studies$protocols[[i]]$comments <- sProtsCommentDat
+#'     sProtsParamsDat <- deparseProtocolParams(value[[i]])
+#'     x@content$studies$protocols[[i]]$parameters <- sProtsParamsDat
+#'   }
+#'   #validISAJSONObject(x)
+#'   return(x)
+#' })
+
+
+
+
+
+
+### sAssays
+#'
+#' #' @rdname sAssays
+#' setMethod("sAssays", "ISAjson", function(x) {
+#'   data.frame(x@content$studies$assays[[1]][sAssaysCols])
+#' })
+#'
+#' #' @rdname sAssays
+#' setMethod("sAssays<-", "ISAjson", function(x, value) {
+#'   for (sAssaysCol in sAssaysCols) {
+#'     x@content$studies$assays[[1]][[sAssaysCol]] <- value[[sAssaysCol]]
+#'   }
+#'   #validISAJSONObject(x)
+#'   return(x)
+#' })
 
 #'
 #' ### sFiles
