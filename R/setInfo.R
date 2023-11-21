@@ -307,6 +307,7 @@ setMethod("sAssays", "ISAjson", function(x) {
                          sAssaysDat <- cbind(sAssaysDat, sAssaysTechOnt)
                          return(sAssaysDat)
                        })
+  return(sAssaysLst)
 })
 
 #' @rdname sAssays
@@ -317,10 +318,11 @@ setMethod("sAssays<-", "ISAjson", function(x, value) {
   x@content$studies$assays <- sAssaysLst
   for (i in seq_along(value)) {
     sAssaysCommentDat <- deparseComments(value[[i]])
-    x@content$studies$factors[[i]]$comments <- sAssaysCommentDat
-    sAssaysOntology <- deparseOntologySource(value[[i]], name = "measurementType")
-    x@content$studies$factors[[i]]$measurementType <- sAssaysOntology
-
+    x@content$studies$assays[[i]]$comments <- sAssaysCommentDat
+    sAssaysMeasOntology <- deparseOntologySource(value[[i]], name = "measurementType")
+    x@content$studies$assays[[i]]$measurementType <- sAssaysMeasOntology
+    sAssaysTechOntology <- deparseOntologySource(value[[i]], name = "technologyType")
+    x@content$studies$assays[[i]]$technologyType <- sAssaysTechOntology
   }
   #validISAJSONObject(x)
   return(x)

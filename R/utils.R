@@ -169,7 +169,7 @@ parseComments <- function(comments) {
 #' @noRd
 #' @keywords internal
 deparseComments <- function(dat) {
-  if (length(dat) > 0) {
+  if (nrow(dat) > 0) {
     commentCols <- colnames(dat)[startsWith(colnames(dat), "Comment[") &
                                    endsWith(colnames(dat), "]")]
     if (length(commentCols) > 0) {
@@ -177,16 +177,14 @@ deparseComments <- function(dat) {
                            x = commentCols, fixed = TRUE)
       commentNames <- substring(commentNames, first = 1,
                                 last = nchar(commentNames) - 1)
-    }
-    lapply(X = 1:nrow(dat), FUN = function(i) {
-      if (length(commentCols) > 0) {
+      lapply(X = 1:nrow(dat), FUN = function(i) {
         return(data.frame(name = commentNames,
                           value = unlist(dat[i, commentCols]),
                           row.names = NULL))
-      } else {
-        return(list())
-      }
-    })
+      })
+    } else {
+      return(data.frame(matrix(nrow = nrow(dat), ncol = 0)))
+    }
   } else {
     return(list())
   }
@@ -262,7 +260,7 @@ deparseOntologySourceLst <- function(dat,
       i <- 1
       while (pos + i <= ncol(dat) &&
              (colnames(dat)[pos + i] %in% ontologyAnnotationCols ||
-             startsWith(x = colnames(dat)[pos + i], prefix = "Comment"))) {
+              startsWith(x = colnames(dat)[pos + i], prefix = "Comment"))) {
         ontCol <- colnames(dat)[pos + i]
         ontDat[[ontCol]] <- dat[pos + i]
         i <- i + 1
