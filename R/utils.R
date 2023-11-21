@@ -248,6 +248,38 @@ parseOntologySourceLst <- function(dat,
   return(ontAnnotDat)
 }
 
+#' Helper function for deparsing ontology annotation.
+#'
+#' @noRd
+#' @keywords internal
+deparseOntologySourceLst <- function(dat,
+                                     name) {
+  nameColPos <- which(colnames(dat) == name)
+  if (length(nameColPos) > 0) {
+    ontDatLst <- lapply(X = nameColPos, FUN = function(pos) {
+      ontDat <- dat[, pos, drop = FALSE]
+      colnames(ontDat) <- "annotationValue"
+      i <- 1
+      while (pos + i <= ncol(dat) &&
+             (colnames(dat)[pos + i] %in% ontologyAnnotationCols ||
+             startsWith(x = colnames(dat)[pos + i], prefix = "Comment"))) {
+        ontCol <- colnames(dat)[pos + i]
+        ontDat[[ontCol]] <- dat[pos + i]
+        i <- i + 1
+      }
+      missCols <- ontologyAnnotationCols[!ontologyAnnotationCols %in% colnames(ontDat)]
+      if (length(missCols) > 0) ontDat[, missCols] <- ""
+      colnames(ontDat) <- paste0(name, colnames(ontDat))
+      ontDat <- deparseOntologySource(ontDat, name = name)
+      return(ontDat)
+    })
+  } else {
+    ontDatLst <- list()
+  }
+  return(ontDatLst)
+}
+
+
 
 #' Helper function for parsing protocol parameters.
 #'

@@ -235,7 +235,7 @@ setMethod("sContacts<-", "ISAjson", function(x, value) {
   for (i in seq_along(value)) {
     sContactsCommentDat <- deparseComments(value[[i]])
     x@content$studies$people[[i]]$comments <- sContactsCommentDat
-    sContactsOntology <- deparseOntologySource(value[[i]], name = "roles")
+    sContactsOntology <- deparseOntologySourceLst(value[[i]], name = "roles")
     x@content$studies$people[[i]]$roles <- sContactsOntology
 
   }
