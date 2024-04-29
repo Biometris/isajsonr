@@ -33,22 +33,7 @@ sFactCols <- c("@id",
                "factorName")
 sAssaysCols <- c("filename",
                  "technologyPlatform")
-sProtsCols <- c("Study Protocol Name",
-                "Study Protocol Type",
-                "Study Protocol Type Term Accession Number",
-                "Study Protocol Type Term Source REF",
-                "Study Protocol Description",
-                "Study Protocol URI",
-                "Study Protocol Version",
-                "Study Protocol Parameters Name",
-                "Study Protocol Parameters Name Term Accession Number",
-                "Study Protocol Parameters Name Term Source REF",
-                "Study Protocol Components Name",
-                "Study Protocol Components Type",
-                "Study Protocol Components Type Term Accession Number",
-                "Study Protocol Components Type Term Source REF")
-
-sProtsCols <- c("id",
+sProtsCols <- c("@id",
                 "name",
                 "description",
                 "uri",
@@ -57,11 +42,9 @@ ontologyAnnotationCols <- c("@id",
                             "annotationValue",
                             "termSource",
                             "termAccession")
-
-# sFilesCols <- c("Source Name",
-#                 "Term Source REF",
-#                 "Sample Name")
-# aFilesCols <- c()
+dataCols <- c("@id",
+              "name",
+              "type")
 
 ### start helper functions ----
 
@@ -238,9 +221,13 @@ parseOntologySourceLst <- function(dat,
     ontDat <- parseOntologySource(d, name = name)
     ## Remove empty columns.
     ontDat <- ontDat[, sapply(X = ontDat, FUN = function(od) {any(nzchar(od))})]
-    colnames(ontDat) <- substring(colnames(ontDat), first = nchar(name) + 1)
-    ontDat[[name]] <- ontDat[["annotationValue"]]
-    ontDat <- ontDat[, c(name, setdiff(colnames(ontDat), c(name, "annotationValue")))]
+    if (ncol(ontDat) > 0) {
+      colnames(ontDat) <- substring(colnames(ontDat), first = nchar(name) + 1)
+      ontDat[[name]] <- ontDat[["annotationValue"]]
+      ontDat <- ontDat[, c(name, setdiff(colnames(ontDat),
+                                         c(name, "annotationValue")))]
+    }
+    return(ontDat)
   })
   ontAnnotDat <- do.call(cbind, ontAnnotLst)
   return(ontAnnotDat)
@@ -276,6 +263,166 @@ deparseOntologySourceLst <- function(dat,
   }
   return(ontDatLst)
 }
+
+
+#' Helper function for parsing data list.
+#'
+#' @noRd
+#' @keywords internal
+parseDataLst <- function(dat,
+                         name) {
+  parsedDatLst <- lapply(X = dat, FUN = function(d) {
+    if (length(d) == 0) {
+      parsedDat <- createEmptyDat(dataCols)
+    } else {
+      parsedDat <- d[dataCols]
+      parsedDatComments <- parseComments(d$comments)
+      if (nrow(parsedDatComments) > 0) {
+        parsedDat <- cbind(parsedDat, parsedDatComments)
+      }
+    }
+    ## Remove empty columns.
+    parsedDat <- parsedDat[, sapply(X = parsedDat, FUN = function(pd) {
+      any(nzchar(pd))
+    })]
+    if (ncol(parsedDat) > 0) {
+      parsedLst <- lapply(X = 1:nrow(parsedDat), FUN = function(i) {
+        datI <- parsedDat[i, ]
+        datI[["dataFiles"]] <- datI[["type"]]
+        datI <- datI[, c("dataFiles", setdiff(colnames(datI),
+                                              c("dataFiles", "type")))]
+      })
+
+    }
+    return(parsedDat)
+  })
+  parsedDat <- do.call(cbind, parsedDatLst)
+  return(parsedDat)
+}
+
+
+#' Helper function for parsing source data.
+#'
+#' @noRd
+#' @keywords internal
+parseSourceLst <- function(dat) {
+  parsedLst <- lapply(X = dat, FUN = function(d) {
+    if (length(d) == 0) {
+      sourceDat <- createEmptyDat(c("@id", "name"))
+    } else {
+      sourceDat <- d[c("@id", "name")]
+      sourceCharDat <- parseCharacteristicsLst(d$characteristics)
+      if (nrow(sourceCharDat) > 0) {
+        sourceDat <- cbind(sourceDat, sourceCharDat)
+      }
+    }
+    return(sourceDat)
+  })
+  return(parsedLst)
+}
+
+
+#' Helper function for parsing samples data.
+#'
+#' @noRd
+#' @keywords internal
+parseSamplesLst <- function(dat) {
+  parsedLst <- lapply(X = dat, FUN = function(d) {
+    if (length(d) == 0) {
+      sampleDat <- createEmptyDat(c("@id", "name"))
+    } else {
+      sampleDat <- d[c("@id", "name")]
+      sampleCharDat <- parseCharacteristicsLst(d$characteristics)
+      if (nrow(sampleCharDat) > 0) {
+        sampleDat <- cbind(sampleDat, sampleCharDat)
+      }
+    }
+    return(sampleDat)
+  })
+  return(parsedLst)
+}
+
+
+#' Helper function for parsing samples data.
+#'
+#' @noRd
+#' @keywords internal
+parseOtherLst <- function(dat) {
+  parsedLst <- lapply(X = dat, FUN = function(d) {
+    if (length(d) == 0) {
+      otherDat <- createEmptyDat(c("@id", "name", "type"))
+    } else {
+      otherDat <- d[c("@id", "name", "type")]
+      otherCharDat <- parseCharacteristicsLst(d$characteristics)
+      if (nrow(otherCharDat) > 0) {
+        otherDat <- cbind(otherDat, otherCharDat)
+      }
+    }
+    return(otherDat)
+  })
+  return(parsedLst)
+}
+
+
+
+
+
+#' Helper function for parsing material attribute.
+#'
+#' @noRd
+#' @keywords internal
+parseMaterialAttribute <- function(dat,
+                                   name) {
+  if (length(dat) == 0) {
+    matAttrDat <- createEmptyDat("@id")
+  } else {
+    matAttrDat <- dat["@id"]
+    matAttrOnt <- parseOntologySource(dat$characteristicsType, "characteristicsType")
+    if (nrow(matAttrOnt) > 0) {
+      matAttrDat <- cbind(matAttrDat, matAttrOnt)
+    }
+  }
+  colnames(matAttrDat) <- paste0(name, colnames(matAttrDat))
+  return(matAttrDat)
+}
+
+
+#' Helper function for parsing characteristics.
+#'
+#' @noRd
+#' @keywords internal
+parseCharacteristicsLst <- function(dat) {
+  parsedLst <- lapply(X = dat, FUN = function(d) {
+    if (length(d) == 0) {
+      characteristicsDat <- createEmptyDat(c("@id", "category", "value", "unit"))
+    } else {
+      characteristicsDat <- parseMaterialAttribute(d$category, "category")
+      if (is.data.frame(d$value)) {
+        valueDat <- parseOntologySource(d$value, "value")
+        characteristicsDat <- cbind(characteristicsDat, valueDat)
+      } else {
+        characteristicsDat$value <- d$value
+      }
+      unitDat <- parseOntologySource(d$unit, "unit")
+      if (nrow(unitDat) > 0) {
+        characteristicsDat <- cbind(characteristicsDat, unitDat)
+      }
+    }
+    return(characteristicsDat)
+  })
+  return(dfBind(parsedLst))
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 

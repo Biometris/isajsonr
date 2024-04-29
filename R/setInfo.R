@@ -121,7 +121,6 @@ setMethod("iContacts<-", "ISAjson", function(x, value) {
 })
 
 
-
 ### study
 
 #' @rdname study
@@ -283,6 +282,40 @@ setMethod("sFacts<-", "ISAjson", function(x, value) {
 })
 
 
+#' @rdname sMaterials
+setMethod("sMaterials", "ISAjson", function(x) {
+  sMaterialsRaw <- x@content$studies$materials
+  if (nrow(sMaterialsRaw) == 0) {
+    sMaterialsDat <- createEmptyDat(c("sources", "samples", "otherMaterials"))
+  } else {
+    sMaterialsSources <- parseSourceLst(sMaterialsRaw$sources)
+    sMaterialsSamples <- parseSamplesLst(sMaterialsRaw$samples)
+    sMaterialsOther <- parseOtherLst(sMaterialsRaw$otherMaterials)
+  }
+  return(list(sources = sMaterialsSources,
+              samples = sMaterialsSamples,
+              other = sMaterialsOther))
+})
+
+
+
+#' @rdname sUnitCats
+setMethod("sUnitCats", "ISAjson", function(x) {
+  sUnitCatsLst <- lapply(X = x@content$studies$unitCategories,
+                   FUN = parseOntologySource, name = "")
+  return(sUnitCatsLst)
+})
+
+#' @rdname sUnitCats
+setMethod("sUnitCats<-", "ISAjson", function(x, value) {
+  sUnitCatsLst <- lapply(X = value, FUN = deparseOntologySource, name = "")
+  x@content$studies$unitCategories <- sUnitCatsLst
+  #validISAJSONObject(x)
+  return(x)
+})
+
+
+
 
 ### sAssays
 
@@ -305,6 +338,11 @@ setMethod("sAssays", "ISAjson", function(x) {
                          sAssaysTechOnt <- parseOntologySource(dat$technologyType,
                                                                name = "technologyType")
                          sAssaysDat <- cbind(sAssaysDat, sAssaysTechOnt)
+                         sAssaysUnitOnt <- parseOntologySourceLst(dat$unitCategories,
+                                                                  name = "unitCategories")
+                         if (ncol(sAssaysUnitOnt) > 0) {
+                           sAssaysDat <- cbind(sAssaysDat, sAssaysUnitOnt)
+                         }
                          return(sAssaysDat)
                        })
   return(sAssaysLst)
@@ -329,178 +367,72 @@ setMethod("sAssays<-", "ISAjson", function(x, value) {
 })
 
 
+### sProts
+
+#' @rdname sProts
+setMethod("sProts", "ISAjson", function(x) {
+  sProtsLst <- lapply(X = x@content$studies$protocols,
+                      FUN = function(dat) {
+                        if (length(dat) == 0) {
+                          sProtsDat <- createEmptyDat(sProtsCols)
+                        } else {
+                          sProtsDat <- dat[sProtsCols]
+                          sProtsComments <- parseComments(dat$comments)
+                          if (nrow(sProtsComments) > 0) {
+                            sProtsDat <- cbind(sProtsDat, sProtsComments)
+                          }
+                        }
+                        sProtsOntology <- parseOntologySource(dat$protocolType,
+                                                              name = "protocolType")
+                        sProtsDat <- cbind(sProtsDat, sProtsOntology)
+                        # sProtsParamOntology <- parseOntologySourceLst(dat$parameters,
+                        #                                               name = "parameters")
+                        # if (ncol(sProtsParamOntology) > 0) {
+                        #   sProtsDat <- cbind(sProtsDat, sProtsParamOntology)
+                        # }
+                        return(sProtsDat)
+                      })
+  return(sProtsLst)
+})
+
+#' @rdname sProts
+setMethod("sProts<-", "ISAjson", function(x, value) {
+  sProtsLst <- lapply(X = value, FUN = function(dat) {
+    sProtsDat <- dat[sProtsCols]
+  })
+  x@content$studies$protocols <- sProtsLst
+  for (i in seq_along(value)) {
+    sProtsCommentDat <- deparseComments(value[[i]])
+    x@content$studies$protocols[[i]]$comments <- sProtsCommentDat
+    sProtsTypeOntology <- deparseOntologySource(value[[i]], name = "protocolType")
+    x@content$studies$protocols[[i]]$protocolType <- sProtsTypeOntology
+    # sProtsParamsDat <- deparseProtocolParams(value[[i]])
+    # x@content$studies$protocols[[i]]$parameters <- sProtsParamsDat
+  }
+  #validISAJSONObject(x)
+  return(x)
+})
+
+
+### aFiles
+
+#' @rdname aFiles
+setMethod("aFiles", "ISAjson", function(x) {
+  lapply(X = x@content$studies$assays, FUN = function(assay) {
+    dataFileAssayList <-lapply(X = assay$dataFiles, FUN = function(dataFile) {
+      dataFileDat <- dataFile[c("@id", "name", "type")]
+      dataFileComments <- parseComments(dataFile$comments)
+      if (nrow(dataFileComments) > 0) {
+        dataFileDat <- cbind(dataFileDat, dataFileComments)
+      }
+      return(dataFileDat)
+    })
+    dataFileAssay <- dfBind(dataFileAssayList)
+    colnames(dataFileAssay) <- paste0("dataFile", colnames(dataFileAssay))
+    return(dataFileAssay)
+  })
+})
 
 
 
 
-
-#' ### sProts
-#'
-#' #' @rdname sProts
-#' setMethod("sProts", "ISAjson", function(x) {
-#'   sProtsLst <- lapply(X = x@content$studies$protocols,
-#'                       FUN = function(dat) {
-#'                         if (length(dat) == 0) {
-#'                           sProtsDat <- createEmptyDat(sProtsCols)
-#'                         } else {
-#'                           sProtsDat <- dat[sProtsCols]
-#'                           sProtsComments <- parseComments(dat$comments)
-#'                           if (nrow(sProtsComments) > 0) {
-#'                             sProtsDat <- cbind(sProtsDat, sProtsComments)
-#'                           }
-#'                         }
-#'                         sProtsOntology <- parseOntologySource(dat$protocolType,
-#'                                                               name = "protocolType")
-#'                         sProtsDat$protocolType <- sProtsOntology
-#'                         sProtsParamsDat <- parseProtocolParams(dat$parameters)
-#'                         sProtsDat <- cbind(sProtsDat, sProtsParamsDat)
-#'                         return(sProtsDat)
-#'                       })
-#'   return(sProtsLst)
-#' })
-#'
-#' #' @rdname sProts
-#' setMethod("sProts<-", "ISAjson", function(x, value) {
-#'   sProtsLst <- lapply(X = value, FUN = function(dat) {
-#'     sProtsDat <- cbind(dat[sProtsCols],
-#'                        deparseOntologySource(dat, name = "protocolType"))
-#'   })
-#'   x@content$studies$protocols <- sProtsLst
-#'   for (i in seq_along(value)) {
-#'     sProtsCommentDat <- deparseComments(value[[i]])
-#'     x@content$studies$protocols[[i]]$comments <- sProtsCommentDat
-#'     sProtsParamsDat <- deparseProtocolParams(value[[i]])
-#'     x@content$studies$protocols[[i]]$parameters <- sProtsParamsDat
-#'   }
-#'   #validISAJSONObject(x)
-#'   return(x)
-#' })
-
-
-
-
-
-
-### sAssays
-#'
-#' #' @rdname sAssays
-#' setMethod("sAssays", "ISAjson", function(x) {
-#'   data.frame(x@content$studies$assays[[1]][sAssaysCols])
-#' })
-#'
-#' #' @rdname sAssays
-#' setMethod("sAssays<-", "ISAjson", function(x, value) {
-#'   for (sAssaysCol in sAssaysCols) {
-#'     x@content$studies$assays[[1]][[sAssaysCol]] <- value[[sAssaysCol]]
-#'   }
-#'   #validISAJSONObject(x)
-#'   return(x)
-#' })
-
-#'
-#' ### sFiles
-#'
-#' #' @rdname sFiles
-#' setMethod("sFiles", "ISA", function(x) x@sFiles)
-#'
-#' #' @rdname sFiles
-#' setMethod("sFiles<-", "ISA", function(x, value) {
-#'   x@sFiles <- value
-#'   validISAObject(x)
-#'   return(x)
-#' })
-#'
-#' ### aFiles
-#'
-#' #' @rdname aFiles
-#' setMethod("aFiles", "ISA", function(x) x@aFiles)
-#'
-#' #' @rdname aFiles
-#' setMethod("aFiles<-", "ISA", function(x, value) {
-#'   x@aFiles <- value
-#'   validISAObject(x)
-#'   return(x)
-#' })
-#'
-#'
-#' ### Convenience functions
-#'
-#' #' Retrieve the Study Identifier(s) and Study File Name(s) from an ISA object.
-#' #'
-#' #' Retrieve from an object of the \code{\link{ISA-class}} the Study
-#' #' Identifier(s) and Study File Name(s) as contained in the Investigation.
-#' #' To directly access the Study Identifier(s) use the names() function, e.g.
-#' #' \code{names(getStudyFileNames(isaObject))}.
-#' #'
-#' #' @inheritParams writeISAtab
-#' #'
-#' #' @return A named character vector containing the Study File Name(s) and the
-#' #' name(s) representing the Study Identifier(s).
-#' #'
-#' #' @examples
-#' #' ## Read example Atwell data set.
-#' #' isaObject1 <- readISATab(path = file.path(system.file("extdata/Atwell",
-#' #'                                           package = "isatabr")))
-#' #'
-#' #' ## Extract study identifiers and file names.
-#' #' getStudyFileNames(isaObject1)
-#' #'
-#' #' @export
-#' getStudyFileNames <- function(isaObject) {
-#'   sapply(X = study(isaObject), FUN = `[[`, ISASyntax$sFileName)
-#' }
-#'
-#' #' Retrieve the Assay File Name(s) per Study from an ISA object.
-#' #'
-#' #' Retrieve from an object of the \code{\link{ISA-class}} the Assay File Name(s)
-#' #' linked to the Study Identifier(s) per Study.
-#' #'
-#' #' @inheritParams writeISAtab
-#' #'
-#' #' @return A named list of character vectors containing the Assay File Name(s)
-#' #' for each Study Identifier. The name of the character vector or names of the
-#' #' list elements represent(s) the Study Identifier(s).
-#' #'
-#' #' #' @examples
-#' #' ## Read example Atwell data set.
-#' #' isaObject1 <- readISATab(path = file.path(system.file("extdata/Atwell",
-#' #'                                           package = "isatabr")))
-#' #'
-#' #' ## Extract assay file names per study.
-#' #' getAssayFileNames(isaObject1)
-#' #'
-#' #' @export
-#' getAssayFileNames <- function(isaObject) {
-#'   lapply(X = sAssays(isaObject), FUN = `[[`, ISASyntax$aFileName)
-#' }
-#'
-#'
-#' #' Retrieve Factor Values per Study File from an ISA object.
-#' #'
-#' #' Retrieve from an object of the \code{\link{ISA-class}} the Factor Values for
-#' #' each Study File.
-#' #'
-#' #' @inheritParams writeISAtab
-#' #'
-#' #' @return A list of factor lists, where each list element, named by the Study
-#' #' Identifier, contains a list of factors specifying the Factor Values used
-#' #' in a specific Study File linked to the Study Identifier.
-#' #'
-#' #' @noRd
-#' #' @keywords internal
-#' getFactors <- function(isaObject) {
-#'   tmplist <- lapply(X = isaObject@sFiles, FUN = function(df) {
-#'     tmplist <- lapply(X = grep(pattern = ISASyntax$fctrValue,
-#'                                x = colnames(df),
-#'                                value = TRUE),
-#'                       FUN = function(x) {
-#'                         factor(df[[x]])
-#'                       })
-#'     names(tmplist) <- grep(pattern = ISASyntax$fctrValue,
-#'                            x = colnames(df),
-#'                            value = TRUE)
-#'     return(tmplist)
-#'   })
-#'   names(tmplist) <- getStudyFileNames(isaObject)
-#'   return(tmplist)
-#' }

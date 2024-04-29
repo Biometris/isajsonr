@@ -260,6 +260,30 @@ setGeneric("sFacts", function(x) standardGeneric("sFacts"))
 setGeneric("sFacts<-", function(x, value) standardGeneric("sFacts<-"))
 
 
+### sUnitCats standard generics.
+
+#' Get and set sUnitCats.
+#'
+#' Get and set the list of sUnitCats data.frames in an object of
+#' \linkS4class{ISAjson}.
+#'
+#' @param x An object of class \linkS4class{ISAjson}.
+#'
+#' @return A list of data.frames containing the study unit categories.
+#'
+#' @rdname sUnitCats
+#' @export
+setGeneric("sUnitCats", function(x) standardGeneric("sUnitCats"))
+
+#' @param x An object of class \linkS4class{ISAjson}.
+#' @param value A list of data.frames containing the study unit categories.
+#'
+#' @return The updated object of class \linkS4class{ISAjson}.
+#' @rdname sUnitCats
+#' @export
+setGeneric("sUnitCats<-", function(x, value) standardGeneric("sUnitCats<-"))
+
+
 ### sAssays standard generics.
 
 #' Get and set sAssays.
@@ -313,6 +337,31 @@ setGeneric("sProts", function(x) standardGeneric("sProts"))
 setGeneric("sProts<-", function(x, value) standardGeneric("sProts<-"))
 
 
+### sMaterials standard generics.
+
+#' Get and set sMaterials
+#'
+#' Get and set the list of sMaterials data.frames in an object of
+#' \linkS4class{ISAjson}.
+#'
+#' @param x An object of class \linkS4class{ISAjson}.
+#'
+#' @return A list of data.frames containing the study protocols.
+#'
+#' @rdname sMaterials
+#' @export
+setGeneric("sMaterials", function(x) standardGeneric("sMaterials"))
+
+#' @param x An object of class \linkS4class{ISAjson}.
+#' @param value A list of data.frames containing the study materials.
+#'
+#' @return The updated object of class \linkS4class{ISAjson}.
+#'
+#' @rdname sMaterials
+#' @export
+setGeneric("sMaterials<-", function(x, value) standardGeneric("sMaterials<-"))
+
+
 ### sContacts standard generics.
 
 #' Get and set sContacts.
@@ -364,4 +413,29 @@ setGeneric("sFiles", function(x) standardGeneric("sFiles"))
 #' @export
 setGeneric("sFiles<-", function(x, value) standardGeneric("sFiles<-"))
 
+
+### aFiles standard generics.
+
+#' Get and set aFiles.
+#'
+#' Get and set the list of aFiles data.frames in an object of
+#' \linkS4class{ISAjson}.
+#'
+#' @param x An object of class \linkS4class{ISAjson}.
+#'
+#' @return A list of data.frames containing the assay files.
+#'
+#' @rdname aFiles
+#' @export
+setGeneric("aFiles", function(x) standardGeneric("aFiles"))
+
+#' @param x An object of class \linkS4class{ISAjson}.
+#' @param value A list of data.frames containing the assay files.
+#' In each data.frame at least the following columns are present:
+#' `r paste0("'", aFilesCols, "'", collapse = ", ")`.
+#'
+#' @return The updated object of class \linkS4class{ISAjson}.
+#' @rdname aFiles
+#' @export
+setGeneric("aFiles<-", function(x, value) standardGeneric("aFiles<-"))
 
