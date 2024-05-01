@@ -150,6 +150,7 @@ setMethod("study<-", "ISAjson", function(x, value) {
 setMethod("sDD", "ISAjson", function(x) {
   sDDLst <- lapply(X = x@content$studies$studyDesignDescriptors,
                    FUN = parseOntologySource, name = "")
+  names(sDDLst) <- getStudyFileNames(x)
   return(sDDLst)
 })
 
@@ -182,6 +183,7 @@ setMethod("sPubs", "ISAjson", function(x) {
                        sPubsDat <- cbind(sPubsDat, sPubsOntology)
                        return(sPubsDat)
                      })
+  names(sPubsLst) <- getStudyFileNames(x)
   return(sPubsLst)
 })
 
@@ -222,6 +224,7 @@ setMethod("sContacts", "ISAjson", function(x) {
                            sContactsDat <- cbind(sContactsDat, sContactsOntology)
                            return(sContactsDat)
                          })
+  names(sContactsLst) <- getStudyFileNames(x)
   return(sContactsLst)
 })
 
@@ -261,6 +264,7 @@ setMethod("sFacts", "ISAjson", function(x) {
                         sFactsDat <- cbind(sFactsDat, sFactsOntology)
                         return(sFactsDat)
                       })
+  names(sFactsLst) <- getStudyFileNames(x)
   return(sFactsLst)
 })
 
@@ -292,9 +296,11 @@ setMethod("sMaterials", "ISAjson", function(x) {
     sMaterialsSamples <- parseSamplesLst(sMaterialsRaw$samples)
     sMaterialsOther <- parseOtherLst(sMaterialsRaw$otherMaterials)
   }
-  return(list(sources = sMaterialsSources,
-              samples = sMaterialsSamples,
-              other = sMaterialsOther))
+  sMaterialsLst <- list(list(sources = sMaterialsSources,
+                             samples = sMaterialsSamples,
+                             other = sMaterialsOther))
+  names(sMaterialsLst) <- getStudyFileNames(x)
+  return(sMaterialsLst)
 })
 
 
@@ -303,6 +309,7 @@ setMethod("sMaterials", "ISAjson", function(x) {
 setMethod("sUnitCats", "ISAjson", function(x) {
   sUnitCatsLst <- lapply(X = x@content$studies$unitCategories,
                          FUN = parseOntologySource, name = "")
+  names(sUnitCatsLst) <- getStudyFileNames(x)
   return(sUnitCatsLst)
 })
 
@@ -424,6 +431,7 @@ setMethod("sProts", "ISAjson", function(x) {
                         # }
                         return(sProtsDat)
                       })
+  names(sProtsLst) <- getStudyFileNames(x)
   return(sProtsLst)
 })
 
