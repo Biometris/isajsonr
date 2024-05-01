@@ -302,7 +302,7 @@ setMethod("sMaterials", "ISAjson", function(x) {
 #' @rdname sUnitCats
 setMethod("sUnitCats", "ISAjson", function(x) {
   sUnitCatsLst <- lapply(X = x@content$studies$unitCategories,
-                   FUN = parseOntologySource, name = "")
+                         FUN = parseOntologySource, name = "")
   return(sUnitCatsLst)
 })
 
@@ -345,6 +345,7 @@ setMethod("sAssays", "ISAjson", function(x) {
                          }
                          return(sAssaysDat)
                        })
+  names(sAssaysLst) <- sapply(sAssaysLst, `[[`, "filename")
   return(sAssaysLst)
 })
 
@@ -418,7 +419,7 @@ setMethod("sProts<-", "ISAjson", function(x, value) {
 
 #' @rdname aFiles
 setMethod("aFiles", "ISAjson", function(x) {
-  lapply(X = x@content$studies$assays, FUN = function(assay) {
+  aFiles <- lapply(X = x@content$studies$assays, FUN = function(assay) {
     dataFileAssayList <-lapply(X = assay$dataFiles, FUN = function(dataFile) {
       dataFileDat <- dataFile[c("@id", "name", "type")]
       dataFileComments <- parseComments(dataFile$comments)
@@ -431,8 +432,61 @@ setMethod("aFiles", "ISAjson", function(x) {
     colnames(dataFileAssay) <- paste0("dataFile", colnames(dataFileAssay))
     return(dataFileAssay)
   })
+  names(aFiles) <- sapply(x@content$studies$assays, `[[`, "filename")
+  return(aFiles)
 })
 
 
+### aMaterials
+
+
+#' @rdname aMaterials
+setMethod("aMaterials", "ISAjson", function(x) {
+  assayDat <- x@content$studies$assays
+  lapply(X = assayDat, FUN = function(assay) {
+    aMaterialsRaw <- assay$materials
+    if (nrow(aMaterialsRaw) == 0) {
+      aMaterialsDat <- createEmptyDat(c("samples", "otherMaterials"))
+    } else {
+      aMaterialsSamples <- parseSamplesLst(aMaterialsRaw$samples)
+      aMaterialsOther <- parseOtherLst(aMaterialsRaw$otherMaterials)
+    }
+    return(list(samples = aMaterialsSamples,
+                other = aMaterialsOther))
+  })
+})
+
+
+
+#' @rdname aUnitCats
+setMethod("aUnitCats", "ISAjson", function(x) {
+  assayDat <- x@content$studies$assays
+  aUnitCats <- lapply(X = assayDat, FUN = function(assay) {
+    aUnitCatsLst <- lapply(X = assay$unitCategories,
+                           FUN = parseOntologySource, name = "")
+  })
+  return(aUnitCats)
+})
+
+
+
+#' Retrieve Factor Values per Study File from an ISA object.
+#'
+#' Retrieve from an object of the \code{\link{ISA-class}} the Factor Values for
+#' each Study File.
+#'
+#' @inheritParams writeISAtab
+#'
+#' @return A list of factor lists, where each list element, named by the Study
+#' Identifier, contains a list of factors specifying the Factor Values used
+#' in a specific Study File linked to the Study Identifier.
+#'
+#' @noRd
+#' @keywords internal
+getFactors <- function(isaObject) {
+  tmplist <- lapply(sFacts(isaObject), `[[` , "factorTypeannotationValue")
+  #names(tmplist) <- getStudyFileNames(isaObject)
+  return(tmplist)
+}
 
 

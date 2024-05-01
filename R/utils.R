@@ -46,6 +46,34 @@ dataCols <- c("@id",
               "name",
               "type")
 
+
+## Raw Data File Column Names - depend on technology type.
+rawDataFileCols = c(base = "Raw Data File",
+                    microarray = "Array Data File",
+                    ms = "Raw Spectral Data File",
+                    "Free Induction Decay Data File")
+
+## Derived Data File Column Names - depend on technology type.
+derivedDataFileCols = c(base = "Derived Data File",
+                        microarray = "Derived Array Data File",
+                        ms = "Derived Spectral Data File")
+
+### start technologyTypes list ----
+## Technology types is a free field.
+## Some technologies may have different/additional defined columns.
+## Those technologies are specified here
+technologyTypes <- list(
+  microarray = "DNA microarray",
+  gelelecto  = "Gel electrophoresis",
+  fc         = "flow cytometry",
+  ms         = "mass spectrometry",
+  NMR        = "NMR spectroscopy",
+  seq        = "nucleotide sequencing"
+)
+### end technologyTypes list ----
+
+
+
 ### start helper functions ----
 
 checkCharacter <- function(...) {
@@ -315,6 +343,9 @@ parseSourceLst <- function(dat) {
       if (nrow(sourceCharDat) > 0) {
         sourceDat <- cbind(sourceDat, sourceCharDat)
       }
+      if (nrow(sourceDat) > 0) {
+        colnames(sourceDat) <- paste0("sources", colnames(sourceDat))
+      }
     }
     return(sourceDat)
   })
@@ -331,10 +362,13 @@ parseSamplesLst <- function(dat) {
     if (length(d) == 0) {
       sampleDat <- createEmptyDat(c("@id", "name"))
     } else {
-      sampleDat <- d[c("@id", "name")]
+      sampleDat <- d[, colnames(d) %in% c("@id", "name"), drop = FALSE]
       sampleCharDat <- parseCharacteristicsLst(d$characteristics)
       if (nrow(sampleCharDat) > 0) {
         sampleDat <- cbind(sampleDat, sampleCharDat)
+      }
+      if (nrow(sampleDat) > 0) {
+        colnames(sampleDat) <- paste0("samples", colnames(sampleDat))
       }
     }
     return(sampleDat)
@@ -356,6 +390,9 @@ parseOtherLst <- function(dat) {
       otherCharDat <- parseCharacteristicsLst(d$characteristics)
       if (nrow(otherCharDat) > 0) {
         otherDat <- cbind(otherDat, otherCharDat)
+      }
+      if (nrow(otherDat) > 0) {
+        colnames(otherDat) <- paste0("other", colnames(otherDat))
       }
     }
     return(otherDat)

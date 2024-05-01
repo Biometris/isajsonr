@@ -18,4 +18,8 @@ Imports:
     jsonlite,
     jsonvalidate,
     methods
+Suggests:
+    affy,
+    Biobase,
+    xcms
 RoxygenNote: 7.3.1
