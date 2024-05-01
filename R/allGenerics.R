@@ -388,6 +388,59 @@ setGeneric("sContacts", function(x) standardGeneric("sContacts"))
 setGeneric("sContacts<-", function(x, value) standardGeneric("sContacts<-"))
 
 
+### sProcSeq standard generics.
+
+#' Get and set sProcSeq.
+#'
+#' Get and set the list of sProcSeq data.frames in an object of
+#' \linkS4class{ISAjson}.
+#'
+#' @param x An object of class \linkS4class{ISAjson}.
+#'
+#' @return A list of data.frames containing the study process sequences
+#'
+#' @rdname sProcSeq
+#' @export
+setGeneric("sProcSeq", function(x) standardGeneric("sProcSeq"))
+
+#' @param x An object of class \linkS4class{ISAjson}.
+#' @param value A list of data.frames containing the study process sequences.
+#' In each data.frame at least the following columns are present:
+#' `r paste0("'", sProcSeqCols, "'", collapse = ", ")`.
+#'
+#' @return The updated object of class \linkS4class{ISAjson}.
+#'
+#' @rdname sProcSeq
+#' @export
+setGeneric("sProcSeq<-", function(x, value) standardGeneric("sProcSeq<-"))
+
+
+### sCharCats standard generics.
+
+#' Get and set sCharCats.
+#'
+#' Get and set the list of sCharCats data.frames in an object of
+#' \linkS4class{ISAjson}.
+#'
+#' @param x An object of class \linkS4class{ISAjson}.
+#'
+#' @return A list of data.frames containing the study characteristic categories.
+#'
+#' @rdname sCharCats
+#' @export
+setGeneric("sCharCats", function(x) standardGeneric("sCharCats"))
+
+#' @param x An object of class \linkS4class{ISAjson}.
+#' @param value A list of data.frames containing the study characteristic
+#' categories. In each data.frame at least the following columns are present:
+#' `r paste0("'", sCharCatsCols, "'", collapse = ", ")`.
+#'
+#' @return The updated object of class \linkS4class{ISAjson}.
+#' @rdname sCharCats
+#' @export
+setGeneric("sCharCats<-", function(x, value) standardGeneric("sCharCats<-"))
+
+
 ### sFiles standard generics.
 
 #' Get and set sFiles.

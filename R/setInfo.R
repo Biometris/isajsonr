@@ -315,6 +315,37 @@ setMethod("sUnitCats<-", "ISAjson", function(x, value) {
 })
 
 
+#' @rdname sCharCats
+setMethod("sCharCats", "ISAjson", function(x) {
+  sCharCatsLst <- lapply(X = x@content$studies$characteristicCategories,
+                      FUN = function(dat) {
+                        if (length(dat) == 0) {
+                          sCharCatsDat <- createEmptyDat(sCharCatsCols)
+                        } else {
+                          sCharCatsDat <- dat[sCharCatsCols]
+                        }
+                        sCharCatsOntology <- parseOntologySource(dat$characteristicType,
+                                                                 name = "characteristicType")
+                        sCharCatsDat <- cbind(sCharCatsDat, sCharCatsOntology)
+                        return(sCharCatsDat)
+                      })
+  names(sCharCatsLst) <- getStudyFileNames(x)
+  return(sCharCatsLst)
+})
+
+#' @rdname sCharCats
+setMethod("sCharCats<-", "ISAjson", function(x, value) {
+  sCharCatsLst <- lapply(X = value, FUN = function(dat) {
+    sCharCatsDat <- dat[sFactCols]
+  })
+  x@content$studies$factors <- sCharCatsLst
+  for (i in seq_along(value)) {
+    sCharCatsOntology <- deparseOntologySource(value[[i]], name = "characteristicType")
+    x@content$studies$factors[[i]]$factorType <- sCharCatsOntology
+  }
+  #validISAJSONObject(x)
+  return(x)
+})
 
 
 ### sAssays
@@ -413,6 +444,59 @@ setMethod("sProts<-", "ISAjson", function(x, value) {
   #validISAJSONObject(x)
   return(x)
 })
+
+
+### sProcSeq
+
+#' @rdname sProcSeq
+setMethod("sProcSeq", "ISAjson", function(x) {
+  sProcSeqLst <- lapply(X = x@content$studies$processSequence,
+                        FUN = function(dat) {
+                          if (length(dat) == 0) {
+                            sProcSeqDat <- createEmptyDat(sProcSeqCols)
+                          } else {
+                            sProcSeqDat <- dat[sProcSeqCols]
+                            sProcSeqComments <- parseComments(dat$comments)
+                            if (nrow(sProcSeqComments) > 0) {
+                              sProcSeqDat <- cbind(sProcSeqDat, sProcSeqComments)
+                            }
+                            if (!is.null(dat$executesProtocol)) {
+                              sProcSeqDat$executesProtocol <- dat$executesProtocol
+                            }
+                            if (!is.null(dat$previousProcess)) {
+                              sProcSeqDat$previousProcess <- dat$previousProcess
+                            }
+                            if (!is.null(dat$nextProcess)) {
+                              sProcSeqDat$nextProcess <- dat$nextProcess
+                            }
+                            sProcSeqDat$inputs <- paste(unlist(dat$inputs),
+                                                        collapse = ", ")
+                            sProcSeqDat$outputs <- paste(unlist(dat$outputs),
+                                                         collapse = ", ")
+                          }
+                          return(sProcSeqDat)
+                        })
+  names(sProcSeqLst) <- getStudyFileNames(x)
+  return(sProcSeqLst)
+})
+
+#' #' @rdname sProcSeq
+#' setMethod("sProcSeq<-", "ISAjson", function(x, value) {
+#'   sProcSeqLst <- lapply(X = value, FUN = function(dat) {
+#'     sProcSeqDat <- dat[sProcSeqCols]
+#'   })
+#'   x@content$studies$protocols <- sProcSeqLst
+#'   for (i in seq_along(value)) {
+#'     sProcSeqCommentDat <- deparseComments(value[[i]])
+#'     x@content$studies$protocols[[i]]$comments <- sProcSeqCommentDat
+#'     sProcSeqTypeOntology <- deparseOntologySource(value[[i]], name = "protocolType")
+#'     x@content$studies$protocols[[i]]$protocolType <- sProcSeqTypeOntology
+#'     # sProcSeqParamsDat <- deparseProtocolParams(value[[i]])
+#'     # x@content$studies$protocols[[i]]$parameters <- sProcSeqParamsDat
+#'   }
+#'   #validISAJSONObject(x)
+#'   return(x)
+#' })
 
 
 ### aFiles

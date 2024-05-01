@@ -31,6 +31,7 @@ sDDCols <- c("annotationValue",
              "termAccession")
 sFactCols <- c("@id",
                "factorName")
+sCharCatsCols <- c("@id")
 sAssaysCols <- c("filename",
                  "technologyPlatform")
 sProtsCols <- c("@id",
@@ -38,6 +39,10 @@ sProtsCols <- c("@id",
                 "description",
                 "uri",
                 "version")
+sProcSeqCols <- c("@id",
+                  "name",
+                  "date",
+                  "performer")
 ontologyAnnotationCols <- c("@id",
                             "annotationValue",
                             "termSource",
