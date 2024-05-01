@@ -345,7 +345,7 @@ setMethod("sAssays", "ISAjson", function(x) {
                          }
                          return(sAssaysDat)
                        })
-  names(sAssaysLst) <- sapply(sAssaysLst, `[[`, "filename")
+  names(sAssaysLst) <- getStudyFileNames(x)
   return(sAssaysLst)
 })
 
@@ -432,7 +432,7 @@ setMethod("aFiles", "ISAjson", function(x) {
     colnames(dataFileAssay) <- paste0("dataFile", colnames(dataFileAssay))
     return(dataFileAssay)
   })
-  names(aFiles) <- sapply(x@content$studies$assays, `[[`, "filename")
+  names(aFiles) <- getStudyFileNames(x)
   return(aFiles)
 })
 
@@ -469,10 +469,49 @@ setMethod("aUnitCats", "ISAjson", function(x) {
 })
 
 
+### Convenience functions
+
+#' Retrieve the Study File Name(s) and Study File Identifier(s)from an ISAjson
+#' object.
+#'
+#' Retrieve from an object of the \linkS4class{ISAjson} the Study
+#' Identifier(s) and Study File Name(s) as contained in the Investigation.
+#' To directly access the Study Identifier(s) use the names() function, e.g.
+#' \code{names(getStudyFileNames(isaObject))}.
+#'
+#' @inheritParams writeISAjson
+#'
+#' @return A named character vector containing the Study File Name(s) and the
+#' name(s) representing the Study Identifier(s).
+#'
+#' @export
+getStudyFileNames <- function(isaObject) {
+  studies <- study(isaObject)
+  studyNames <- sapply(X = 1:nrow(studies), FUN = function(i) {
+    studyName <- studies[i, "filename"]
+    if (!nzchar(studyName)) {
+      paste0("study", i)
+    } else {
+      studyName
+    }
+  })
+  studyIds <- sapply(X = 1:nrow(studies), FUN = function(i) {
+    studyId <- studies[i, "identifier"]
+    if (!nzchar(studyId)) {
+      paste0("study", i)
+    } else {
+      studyId
+    }
+  })
+  names(studyNames) <- studyIds
+  return(studyNames)
+}
+
+
 
 #' Retrieve Factor Values per Study File from an ISA object.
 #'
-#' Retrieve from an object of the \code{\link{ISA-class}} the Factor Values for
+#' Retrieve from an object of the \linkS4class{ISAjson} the Factor Values for
 #' each Study File.
 #'
 #' @inheritParams writeISAtab

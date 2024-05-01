@@ -11,6 +11,7 @@
 #' @export
 getAssayTabs <- function(isaObject) {
   ## Get info from isaObject.
+  studyFileNames <- getStudyFileNames(isaObject)
   assayInfo <- sAssays(isaObject)
   assayFiles <- aFiles(isaObject)
   assayTabs <- lapply(X = seq_along(assayInfo), FUN = function(i) {
@@ -29,7 +30,7 @@ getAssayTabs <- function(isaObject) {
           sFilename = "",
           sIdentifier = studyId,
           aFilename = studyAssay[j, "filename"],
-          aFile = assayFiles[[studyAssay[j, "filename"]]],
+          aFile = assayFiles[[studyFileNames[j]]],
           aTechType = assayTechType,
           aMeasType = assayMeasType
       )
@@ -37,7 +38,7 @@ getAssayTabs <- function(isaObject) {
     #names(assayTabsStudy) <- studyAssay[[ISASyntax$aFileName]]
     return(assayTabsStudy)
   })
-  #names(assayTabs) <- studyFileNames
+  names(assayTabs) <- studyFileNames
   return(assayTabs)
 }
 
