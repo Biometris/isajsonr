@@ -30,7 +30,7 @@ getAssayTabs <- function(isaObject) {
           sFilename = "",
           sIdentifier = studyId,
           aFilename = studyAssay[j, "filename"],
-          aFile = assayFiles[[studyFileNames[j]]],
+          aFile = assayFiles[[studyFileNames[i]]][j, ],
           aTechType = assayTechType,
           aMeasType = assayMeasType
       )

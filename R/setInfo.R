@@ -443,7 +443,7 @@ setMethod("aFiles", "ISAjson", function(x) {
 #' @rdname aMaterials
 setMethod("aMaterials", "ISAjson", function(x) {
   assayDat <- x@content$studies$assays
-  lapply(X = assayDat, FUN = function(assay) {
+  aMaterialsLst <- lapply(X = assayDat, FUN = function(assay) {
     aMaterialsRaw <- assay$materials
     if (nrow(aMaterialsRaw) == 0) {
       aMaterialsDat <- createEmptyDat(c("samples", "otherMaterials"))
@@ -454,6 +454,8 @@ setMethod("aMaterials", "ISAjson", function(x) {
     return(list(samples = aMaterialsSamples,
                 other = aMaterialsOther))
   })
+  names(aMaterialsLst) <- getStudyFileNames(x)
+  return(aMaterialsLst)
 })
 
 
@@ -461,11 +463,12 @@ setMethod("aMaterials", "ISAjson", function(x) {
 #' @rdname aUnitCats
 setMethod("aUnitCats", "ISAjson", function(x) {
   assayDat <- x@content$studies$assays
-  aUnitCats <- lapply(X = assayDat, FUN = function(assay) {
-    aUnitCatsLst <- lapply(X = assay$unitCategories,
+  aUnitCatsLst <- lapply(X = assayDat, FUN = function(assay) {
+    aUnitCatsDat <- lapply(X = assay$unitCategories,
                            FUN = parseOntologySource, name = "")
   })
-  return(aUnitCats)
+  names(aUnitCatsLst) <- getStudyFileNames(x)
+  return(aUnitCatsLst)
 })
 
 
