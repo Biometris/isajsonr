@@ -343,7 +343,7 @@ setMethod("sCharCats", "ISAjson", function(x) {
 #' @rdname sCharCats
 setMethod("sCharCats<-", "ISAjson", function(x, value) {
   sCharCatsLst <- lapply(X = value, FUN = function(dat) {
-    sCharCatsDat <- dat[sFactCols]
+    sCharCatsDat <- dat[sCharCatsCols]
   })
   x@content$studies$factors <- sCharCatsLst
   for (i in seq_along(value)) {
