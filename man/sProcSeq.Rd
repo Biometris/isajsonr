@@ -4,6 +4,7 @@
 \alias{sProcSeq}
 \alias{sProcSeq<-}
 \alias{sProcSeq,ISAjson-method}
+\alias{sProcSeq<-,ISAjson-method}
 \title{Get and set sProcSeq.}
 \usage{
 sProcSeq(x)
@@ -11,6 +12,8 @@ sProcSeq(x)
 sProcSeq(x) <- value
 
 \S4method{sProcSeq}{ISAjson}(x)
+
+\S4method{sProcSeq}{ISAjson}(x) <- value
 }
 \arguments{
 \item{x}{An object of class \linkS4class{ISAjson}.}

@@ -389,11 +389,10 @@ setMethod("sAssays", "ISAjson", function(x) {
 
 #' @rdname sAssays
 setMethod("sAssays<-", "ISAjson", function(x, value) {
-  sAssaysLst <- lapply(X = value, FUN = function(dat) {
-    sAssaysDat <- dat[sAssaysCols]
-  })
-  x@content$studies$assays <- sAssaysLst
   for (i in seq_along(value)) {
+    for (sAssayCol in sAssaysCols) {
+      x@content$studies$assays[[i]][[sAssayCol]] <- value[[i]][[sAssayCol]]
+    }
     sAssaysCommentDat <- deparseComments(value[[i]])
     x@content$studies$assays[[i]]$comments <- sAssaysCommentDat
     sAssaysMeasOntology <- deparseOntologySource(value[[i]], name = "measurementType")
@@ -469,13 +468,13 @@ setMethod("sProcSeq", "ISAjson", function(x) {
                               sProcSeqDat <- cbind(sProcSeqDat, sProcSeqComments)
                             }
                             if (!is.null(dat$executesProtocol)) {
-                              sProcSeqDat$executesProtocol <- dat$executesProtocol
+                              sProcSeqDat$executesProtocol <- dat$executesProtocol$`@id`
                             }
                             if (!is.null(dat$previousProcess)) {
-                              sProcSeqDat$previousProcess <- dat$previousProcess
+                              sProcSeqDat$previousProcess <- dat$previousProcess$`@id`
                             }
                             if (!is.null(dat$nextProcess)) {
-                              sProcSeqDat$nextProcess <- dat$nextProcess
+                              sProcSeqDat$nextProcess <- dat$nextProcess$`@id`
                             }
                             sProcSeqDat$inputs <- paste(unlist(dat$inputs),
                                                         collapse = ", ")
@@ -488,23 +487,46 @@ setMethod("sProcSeq", "ISAjson", function(x) {
   return(sProcSeqLst)
 })
 
-#' #' @rdname sProcSeq
-#' setMethod("sProcSeq<-", "ISAjson", function(x, value) {
-#'   sProcSeqLst <- lapply(X = value, FUN = function(dat) {
-#'     sProcSeqDat <- dat[sProcSeqCols]
-#'   })
-#'   x@content$studies$protocols <- sProcSeqLst
-#'   for (i in seq_along(value)) {
-#'     sProcSeqCommentDat <- deparseComments(value[[i]])
-#'     x@content$studies$protocols[[i]]$comments <- sProcSeqCommentDat
-#'     sProcSeqTypeOntology <- deparseOntologySource(value[[i]], name = "protocolType")
-#'     x@content$studies$protocols[[i]]$protocolType <- sProcSeqTypeOntology
-#'     # sProcSeqParamsDat <- deparseProtocolParams(value[[i]])
-#'     # x@content$studies$protocols[[i]]$parameters <- sProcSeqParamsDat
-#'   }
-#'   #validISAJSONObject(x)
-#'   return(x)
-#' })
+#' @rdname sProcSeq
+setMethod("sProcSeq<-", "ISAjson", function(x, value) {
+  sProcSeqLst <- lapply(X = value, FUN = function(dat) {
+    sProcSeqDat <- dat[sProcSeqCols]
+    if (!is.null(dat$executesProtocol)) {
+      sProcSeqDat$executesProtocol <- data.frame("@id" = dat$executesProtocol,
+                                                 check.names = FALSE)
+    }
+    if (!is.null(dat$previousProcess)) {
+      sProcSeqDat$previousProcess <- ldata.frame("@id" = dat$previousProcess,
+                                                 check.names = FALSE)
+    }
+    if (!is.null(dat$nextProcess)) {
+      sProcSeqDat$nextProcess <- data.frame("@id" = dat$nextProcess,
+                                            check.names = FALSE)
+    }
+    if (!is.null(dat$inputs)) {
+      inputsLst <- strsplit(x = dat$inputs, split = ", ")
+      inputsLst <- lapply(X = inputsLst, FUN = function(input) {
+        data.frame("@id" = input, check.names = FALSE)
+      })
+      sProcSeqDat$inputs <- inputsLst
+    }
+    if (!is.null(dat$outputs)) {
+      outputsLst <- strsplit(x = dat$outputs, split = ", ")
+      outputsLst <- lapply(X = outputsLst, FUN = function(output) {
+        data.frame("@id" = output, check.names = FALSE)
+      })
+      sProcSeqDat$outputs <- outputsLst
+    }
+    return(sProcSeqDat)
+  })
+  x@content$studies$processSequence <- sProcSeqLst
+  for (i in seq_along(value)) {
+    sProcSeqCommentDat <- deparseComments(value[[i]])
+    x@content$studies$processSequence[[i]]$comments <- sProcSeqCommentDat
+  }
+  #validISAJSONObject(x)
+  return(x)
+})
 
 
 ### aFiles
