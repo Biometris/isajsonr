@@ -325,17 +325,17 @@ setMethod("sUnitCats<-", "ISAjson", function(x, value) {
 #' @rdname sCharCats
 setMethod("sCharCats", "ISAjson", function(x) {
   sCharCatsLst <- lapply(X = x@content$studies$characteristicCategories,
-                      FUN = function(dat) {
-                        if (length(dat) == 0) {
-                          sCharCatsDat <- createEmptyDat(sCharCatsCols)
-                        } else {
-                          sCharCatsDat <- dat[sCharCatsCols]
-                        }
-                        sCharCatsOntology <- parseOntologySource(dat$characteristicType,
-                                                                 name = "characteristicType")
-                        sCharCatsDat <- cbind(sCharCatsDat, sCharCatsOntology)
-                        return(sCharCatsDat)
-                      })
+                         FUN = function(dat) {
+                           if (length(dat) == 0) {
+                             sCharCatsDat <- createEmptyDat(sCharCatsCols)
+                           } else {
+                             sCharCatsDat <- dat[sCharCatsCols]
+                           }
+                           sCharCatsOntology <- parseOntologySource(dat$characteristicType,
+                                                                    name = "characteristicType")
+                           sCharCatsDat <- cbind(sCharCatsDat, sCharCatsOntology)
+                           return(sCharCatsDat)
+                         })
   names(sCharCatsLst) <- getStudyFileNames(x)
   return(sCharCatsLst)
 })
@@ -496,8 +496,8 @@ setMethod("sProcSeq<-", "ISAjson", function(x, value) {
                                                  check.names = FALSE)
     }
     if (!is.null(dat$previousProcess)) {
-      sProcSeqDat$previousProcess <- ldata.frame("@id" = dat$previousProcess,
-                                                 check.names = FALSE)
+      sProcSeqDat$previousProcess <- data.frame("@id" = dat$previousProcess,
+                                                check.names = FALSE)
     }
     if (!is.null(dat$nextProcess)) {
       sProcSeqDat$nextProcess <- data.frame("@id" = dat$nextProcess,
@@ -517,12 +517,18 @@ setMethod("sProcSeq<-", "ISAjson", function(x, value) {
       })
       sProcSeqDat$outputs <- outputsLst
     }
-    return(sProcSeqDat)
+    if (nrow(sProcSeqDat) == 0) {
+      return(list())
+    } else {
+      return(sProcSeqDat)
+    }
   })
   x@content$studies$processSequence <- sProcSeqLst
   for (i in seq_along(value)) {
     sProcSeqCommentDat <- deparseComments(value[[i]])
-    x@content$studies$processSequence[[i]]$comments <- sProcSeqCommentDat
+    if (length(sProcSeqCommentDat) > 0) {
+      x@content$studies$processSequence[[i]]$comments <- sProcSeqCommentDat
+    }
   }
   #validISAJSONObject(x)
   return(x)
