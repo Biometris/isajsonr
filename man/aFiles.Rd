@@ -4,6 +4,7 @@
 \alias{aFiles}
 \alias{aFiles<-}
 \alias{aFiles,ISAjson-method}
+\alias{aFiles<-,ISAjson-method}
 \title{Get and set aFiles.}
 \usage{
 aFiles(x)
@@ -11,6 +12,8 @@ aFiles(x)
 aFiles(x) <- value
 
 \S4method{aFiles}{ISAjson}(x)
+
+\S4method{aFiles}{ISAjson}(x) <- value
 }
 \arguments{
 \item{x}{An object of class \linkS4class{ISAjson}.}

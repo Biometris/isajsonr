@@ -539,22 +539,45 @@ setMethod("sProcSeq<-", "ISAjson", function(x, value) {
 
 #' @rdname aFiles
 setMethod("aFiles", "ISAjson", function(x) {
-  aFiles <- lapply(X = x@content$studies$assays, FUN = function(assay) {
-    dataFileAssayList <-lapply(X = assay$dataFiles, FUN = function(dataFile) {
-      dataFileDat <- dataFile[c("@id", "name", "type")]
+  studyFileNames <- getStudyFileNames(x)
+  aFiles <- lapply(X = seq_along(studyFileNames), FUN = function(i) {
+    studyAssays <- x@content$studies$assays[[i]]
+    dataFileAssayLst <- lapply(X = studyAssays$dataFiles, FUN = function(dataFile) {
+      dataFileDat <- dataFile[dataCols]
       dataFileComments <- parseComments(dataFile$comments)
       if (nrow(dataFileComments) > 0) {
         dataFileDat <- cbind(dataFileDat, dataFileComments)
       }
+      colnames(dataFileDat) <- paste0("dataFile", colnames(dataFileDat))
       return(dataFileDat)
     })
-    dataFileAssay <- dfBind(dataFileAssayList)
-    colnames(dataFileAssay) <- paste0("dataFile", colnames(dataFileAssay))
-    return(dataFileAssay)
+    names(dataFileAssayLst) <- getAssayFileNames(x)[[i]]
+    return(dataFileAssayLst)
   })
-  names(aFiles) <- getStudyFileNames(x)
+  names(aFiles) <- studyFileNames
   return(aFiles)
 })
+
+#' @rdname aFiles
+setMethod("aFiles<-", "ISAjson", function(x, value) {
+  studyFiles <- names(value)
+  for (i in seq_along(studyFiles)) {
+    assayFiles <- names(value[[i]])
+    for (j in seq_along(assayFiles)) {
+      dataFileDat <- value[[i]][[j]]
+      colnames(dataFileDat) <- gsub("dataFile", "", colnames(dataFileDat))
+      x@content$studies$assays[[i]]$dataFiles[[j]] <- dataFileDat[dataCols]
+      dataFileCommentDat <- deparseComments(dataFileDat)
+      if (length(dataFileCommentDat) > 0) {
+        x@content$studies$assays[[i]]$dataFiles[[j]]$comments <- dataFileCommentDat
+      }
+    }
+  }
+  #validISAObject(x)
+  return(x)
+})
+
+
 
 
 ### aMaterials
@@ -630,6 +653,35 @@ getStudyFileNames <- function(isaObject) {
   return(studyNames)
 }
 
+
+#' Retrieve the Assay File Name(s) per Study from an ISA object.
+#'
+#' Retrieve from an object of the \linkS4class{ISAjson} the Assay File Name(s)
+#' linked to the Study Identifier(s) per Study.
+#'
+#' @inheritParams writeISAjson
+#'
+#' @return A named list of character vectors containing the Assay File Name(s)
+#' for each Study Identifier. The name of the character vector or names of the
+#' list elements represent(s) the Study Identifier(s).
+#'
+#' @export
+getAssayFileNames <- function(isaObject) {
+  studies <- getStudyFileNames(isaObject)
+  assays <- sAssays(isaObject)
+  assayNames <- lapply(X = seq_along(studies), FUN = function(i) {
+    lapply(X = seq_along(assays[[i]][["filename"]]), FUN = function(j) {
+      assayName <- assays[[i]][["filename"]][j]
+      if (!nzchar(assayName)) {
+        paste0("assay", i)
+      } else {
+        assayName
+      }
+    })
+  })
+  names(assayNames) <- studies
+  return(assayNames)
+}
 
 
 #' Retrieve Factor Values per Study File from an ISA object.
