@@ -4,6 +4,7 @@
 \alias{aUnitCats}
 \alias{aUnitCats<-}
 \alias{aUnitCats,ISAjson-method}
+\alias{aUnitCats<-,ISAjson-method}
 \title{Get and set aUnitCats.}
 \usage{
 aUnitCats(x)
@@ -11,6 +12,8 @@ aUnitCats(x)
 aUnitCats(x) <- value
 
 \S4method{aUnitCats}{ISAjson}(x)
+
+\S4method{aUnitCats}{ISAjson}(x) <- value
 }
 \arguments{
 \item{x}{An object of class \linkS4class{ISAjson}.}

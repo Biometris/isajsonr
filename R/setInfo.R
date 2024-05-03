@@ -606,13 +606,46 @@ setMethod("aMaterials", "ISAjson", function(x) {
 #' @rdname aUnitCats
 setMethod("aUnitCats", "ISAjson", function(x) {
   assayDat <- x@content$studies$assays
-  aUnitCatsLst <- lapply(X = assayDat, FUN = function(assay) {
-    aUnitCatsDat <- lapply(X = assay$unitCategories,
+  aUnitCatsLst <- lapply(X = seq_along(assayDat), FUN = function(i) {
+    aUnitCatsDat <- lapply(X = assayDat[[i]]$unitCategories,
                            FUN = parseOntologySource, name = "")
+    names(aUnitCatsDat) <- getAssayFileNames(x)[[i]]
+    return(aUnitCatsDat)
   })
   names(aUnitCatsLst) <- getStudyFileNames(x)
   return(aUnitCatsLst)
 })
+
+#' @rdname aUnitCats
+setMethod("aUnitCats<-", "ISAjson", function(x, value) {
+  studyFiles <- names(value)
+  for (i in seq_along(studyFiles)) {
+    assayFiles <- names(value[[i]])
+    aUnitCatsLst <- lapply(X = value[[i]], FUN = deparseOntologySource, name = "")
+    for (j in seq_along(aUnitCatsLst)) {
+      x@content$studies$assays[[i]]$unitCategories[[j]] <- aUnitCatsLst[[j]]
+    }
+  }
+  #validISAJSONObject(x)
+  return(x)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ### Convenience functions
