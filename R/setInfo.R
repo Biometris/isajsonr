@@ -345,10 +345,10 @@ setMethod("sCharCats<-", "ISAjson", function(x, value) {
   sCharCatsLst <- lapply(X = value, FUN = function(dat) {
     sCharCatsDat <- dat[sCharCatsCols]
   })
-  x@content$studies$factors <- sCharCatsLst
+  x@content$studies$characteristicCategories <- sCharCatsLst
   for (i in seq_along(value)) {
     sCharCatsOntology <- deparseOntologySource(value[[i]], name = "characteristicType")
-    x@content$studies$factors[[i]]$factorType <- sCharCatsOntology
+    x@content$studies$characteristicCategories[[i]]$characteristicType <- sCharCatsOntology
   }
   #validISAJSONObject(x)
   return(x)
@@ -631,6 +631,57 @@ setMethod("aUnitCats<-", "ISAjson", function(x, value) {
 })
 
 
+
+#' @rdname aCharCats
+setMethod("aCharCats", "ISAjson", function(x) {
+  assayDat <- x@content$studies$assays
+  aUnitCatsLst <- lapply(X = seq_along(assayDat), FUN = function(i) {
+    aCharCatsLst <- lapply(X = assayDat[[i]]$characteristicCategories,
+                           FUN = function(dat) {
+                             if (length(dat) == 0) {
+                               aCharCatsDat <- createEmptyDat(sCharCatsCols)
+                             } else {
+                               aCharCatsDat <- dat[sCharCatsCols]
+                             }
+                             aCharCatsOntology <- parseOntologySource(dat$characteristicType,
+                                                                      name = "characteristicType")
+                             aCharCatsDat <- cbind(aCharCatsDat, aCharCatsOntology)
+                             return(aCharCatsDat)
+                           })
+    names(aCharCatsLst) <- getAssayFileNames(x)[[i]]
+    return(aCharCatsLst)
+  })
+  names(aUnitCatsLst) <- getStudyFileNames(x)
+  return(aUnitCatsLst)
+})
+
+#' @rdname aCharCats
+setMethod("aCharCats<-", "ISAjson", function(x, value) {
+  studyFiles <- names(value)
+  for (i in seq_along(studyFiles)) {
+    assayFiles <- names(value[[i]])
+    aCharCatsLst <- lapply(X = value[[i]], FUN = function(dat) {
+      aCharCatsDat <- dat[sCharCatsCols]
+      if (nrow(aCharCatsDat) > 0) {
+        return(aCharCatsDat)
+      } else {
+        return(list())
+      }
+    })
+    for (j in seq_along(aCharCatsLst)) {
+      x@content$studies$assays[[i]]$characteristicCategories[[j]] <-
+        aCharCatsLst[[j]]
+      if (length(aCharCatsLst[[j]]) > 0) {
+        aCharCatsOntology <- deparseOntologySource(value[[i]][[j]],
+                                                   name = "characteristicType")
+        x@content$studies$assays[[i]]$characteristicCategories[[j]]$characteristicType <-
+          aCharCatsOntology
+      }
+    }
+  }
+  #validISAJSONObject(x)
+  return(x)
+})
 
 
 

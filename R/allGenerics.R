@@ -541,3 +541,29 @@ setGeneric("aUnitCats", function(x) standardGeneric("aUnitCats"))
 #' @export
 setGeneric("aUnitCats<-", function(x, value) standardGeneric("aUnitCats<-"))
 
+
+### aCharCats standard generics.
+
+#' Get and set aCharCats.
+#'
+#' Get and set the list of aCharCats data.frames in an object of
+#' \linkS4class{ISAjson}.
+#'
+#' @param x An object of class \linkS4class{ISAjson}.
+#'
+#' @return A list of data.frames containing the assay characteristic categories.
+#'
+#' @rdname aCharCats
+#' @export
+setGeneric("aCharCats", function(x) standardGeneric("aCharCats"))
+
+#' @param x An object of class \linkS4class{ISAjson}.
+#' @param value A list of data.frames containing the assay characteristic
+#' categories. In each data.frame at least the following columns are present:
+#' `r paste0("'", sCharCatsCols, "'", collapse = ", ")`.
+#'
+#' @return The updated object of class \linkS4class{ISAjson}.
+#' @rdname aCharCats
+#' @export
+setGeneric("aCharCats<-", function(x, value) standardGeneric("aCharCats<-"))
+
