@@ -567,3 +567,29 @@ setGeneric("aCharCats", function(x) standardGeneric("aCharCats"))
 #' @export
 setGeneric("aCharCats<-", function(x, value) standardGeneric("aCharCats<-"))
 
+
+### aProcSeq standard generics.
+
+#' Get and set aProcSeq.
+#'
+#' Get and set the list of aProcSeq data.frames in an object of
+#' \linkS4class{ISAjson}.
+#'
+#' @param x An object of class \linkS4class{ISAjson}.
+#'
+#' @return A list of data.frames containing the assay process sequences
+#'
+#' @rdname aProcSeq
+#' @export
+setGeneric("aProcSeq", function(x) standardGeneric("aProcSeq"))
+
+#' @param x An object of class \linkS4class{ISAjson}.
+#' @param value A list of data.frames containing the assay process sequences.
+#' In each data.frame at least the following columns are present:
+#' `r paste0("'", sProcSeqCols, "'", collapse = ", ")`.
+#'
+#' @return The updated object of class \linkS4class{ISAjson}.
+#'
+#' @rdname aProcSeq
+#' @export
+setGeneric("aProcSeq<-", function(x, value) standardGeneric("aProcSeq<-"))

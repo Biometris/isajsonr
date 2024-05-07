@@ -476,10 +476,16 @@ setMethod("sProcSeq", "ISAjson", function(x) {
                             if (!is.null(dat$nextProcess)) {
                               sProcSeqDat$nextProcess <- dat$nextProcess$`@id`
                             }
-                            sProcSeqDat$inputs <- paste(unlist(dat$inputs),
-                                                        collapse = ", ")
-                            sProcSeqDat$outputs <- paste(unlist(dat$outputs),
-                                                         collapse = ", ")
+                            sProcSeqDat$inputs <- sapply(X = dat$inputs,
+                                                         FUN = function(input) {
+                                                           paste(unlist(input),
+                                                                 collapse = ", ")
+                                                         })
+                            sProcSeqDat$outputs <- sapply(X = dat$outputs,
+                                                          FUN = function(output) {
+                                                            paste(unlist(output),
+                                                                  collapse = ", ")
+                                                          })
                           }
                           return(sProcSeqDat)
                         })
@@ -635,7 +641,7 @@ setMethod("aUnitCats<-", "ISAjson", function(x, value) {
 #' @rdname aCharCats
 setMethod("aCharCats", "ISAjson", function(x) {
   assayDat <- x@content$studies$assays
-  aUnitCatsLst <- lapply(X = seq_along(assayDat), FUN = function(i) {
+  aCharCatsLst <- lapply(X = seq_along(assayDat), FUN = function(i) {
     aCharCatsLst <- lapply(X = assayDat[[i]]$characteristicCategories,
                            FUN = function(dat) {
                              if (length(dat) == 0) {
@@ -651,8 +657,8 @@ setMethod("aCharCats", "ISAjson", function(x) {
     names(aCharCatsLst) <- getAssayFileNames(x)[[i]]
     return(aCharCatsLst)
   })
-  names(aUnitCatsLst) <- getStudyFileNames(x)
-  return(aUnitCatsLst)
+  names(aCharCatsLst) <- getStudyFileNames(x)
+  return(aCharCatsLst)
 })
 
 #' @rdname aCharCats
@@ -685,6 +691,104 @@ setMethod("aCharCats<-", "ISAjson", function(x, value) {
 
 
 
+### aProcSeq
+
+#' @rdname aProcSeq
+setMethod("aProcSeq", "ISAjson", function(x) {
+  assayDat <- x@content$studies$assays
+  aProcSeqLst <- lapply(X = seq_along(assayDat), FUN = function(i) {
+    aProcSeqLst <- lapply(X = assayDat[[i]]$processSequence,
+                          FUN = function(dat) {
+                            if (length(dat) == 0) {
+                              aProcSeqDat <- createEmptyDat(sProcSeqCols)
+                            } else {
+                              aProcSeqDat <- dat[sProcSeqCols]
+                              aProcSeqComments <- parseComments(dat$comments)
+                              if (nrow(aProcSeqComments) > 0) {
+                                aProcSeqDat <- cbind(aProcSeqDat, aProcSeqComments)
+                              }
+                              if (!is.null(dat$executesProtocol)) {
+                                aProcSeqDat$executesProtocol <- dat$executesProtocol$`@id`
+                              }
+                              if (!is.null(dat$previousProcess)) {
+                                aProcSeqDat$previousProcess <- dat$previousProcess$`@id`
+                              }
+                              if (!is.null(dat$nextProcess)) {
+                                aProcSeqDat$nextProcess <- dat$nextProcess$`@id`
+                              }
+                              aProcSeqDat$inputs <- sapply(X = dat$inputs,
+                                                           FUN = function(input) {
+                                                             paste(unlist(input),
+                                                                   collapse = ", ")
+                                                           })
+                              aProcSeqDat$outputs <- sapply(X = dat$outputs,
+                                                            FUN = function(output) {
+                                                              paste(unlist(output),
+                                                                    collapse = ", ")
+                                                            })
+                            }
+                            return(aProcSeqDat)
+                          })
+    names(aProcSeqLst) <- getAssayFileNames(x)[[i]]
+    return(aProcSeqLst)
+  })
+  names(aProcSeqLst) <- getStudyFileNames(x)
+  return(aProcSeqLst)
+})
+
+#' @rdname aProcSeq
+setMethod("aProcSeq<-", "ISAjson", function(x, value) {
+  studyFiles <- names(value)
+  for (i in seq_along(studyFiles)) {
+    assayFiles <- names(value[[i]])
+    aProcSeqLst <- lapply(X = value[[i]], FUN = function(dat) {
+      aProcSeqDat <- dat[sProcSeqCols]
+      if (!is.null(dat$executesProtocol)) {
+        aProcSeqDat$executesProtocol <- data.frame("@id" = dat$executesProtocol,
+                                                   check.names = FALSE)
+      }
+      if (!is.null(dat$previousProcess)) {
+        aProcSeqDat$previousProcess <- data.frame("@id" = dat$previousProcess,
+                                                  check.names = FALSE)
+      }
+      if (!is.null(dat$nextProcess)) {
+        aProcSeqDat$nextProcess <- data.frame("@id" = dat$nextProcess,
+                                              check.names = FALSE)
+      }
+      if (!is.null(dat$inputs)) {
+        inputsLst <- strsplit(x = dat$inputs, split = ", ")
+        inputsLst <- lapply(X = inputsLst, FUN = function(input) {
+          data.frame("@id" = input, check.names = FALSE)
+        })
+        aProcSeqDat$inputs <- inputsLst
+      }
+      if (!is.null(dat$outputs)) {
+        outputsLst <- strsplit(x = dat$outputs, split = ", ")
+        outputsLst <- lapply(X = outputsLst, FUN = function(output) {
+          data.frame("@id" = output, check.names = FALSE)
+        })
+        aProcSeqDat$outputs <- outputsLst
+      }
+      if (nrow(aProcSeqDat) == 0) {
+        return(list())
+      } else {
+        return(aProcSeqDat)
+      }
+    })
+    for (j in seq_along(assayFiles)) {
+      x@content$studies$assays[[i]]$processSequence[[j]] <- aProcSeqLst[[j]]
+      if (length(aProcSeqLst[[j]]) > 0) {
+        aProcSeqCommentDat <- deparseComments(value[[i]][[j]])
+        if (length(aProcSeqCommentDat) > 0) {
+          x@content$studies$assays[[i]]$processSequence[[j]]$comments <-
+            aProcSeqCommentDat
+        }
+      }
+    }
+  }
+  #validISAJSONObject(x)
+  return(x)
+})
 
 
 
