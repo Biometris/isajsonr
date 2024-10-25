@@ -30,7 +30,7 @@ getAssayTabs <- function(isaObject) {
           sFilename = "",
           sIdentifier = studyId,
           aFilename = studyAssay[j, "filename"],
-          aFile = assayFiles[[studyFileNames[i]]][[studyAssay[j, "filename"]]],
+          aFile = assayFiles[[studyFileNames[i]]][[j]],
           aTechType = assayTechType,
           aMeasType = assayMeasType
       )
@@ -42,9 +42,52 @@ getAssayTabs <- function(isaObject) {
   return(assayTabs)
 }
 
+#' Process all assay tab data
+#'
+#' Process data from all assay tab files present in an object of
+#' \linkS4class{ISAjson}.
+#'
+#' @param isaObject An object of the \linkS4class{ISAjson}.
+#' @param type A character string indicating which data files should be
+#' processed, either "raw" for raw data files, or "derived" for derived data
+#' files. The file names are taken from the corresponding column in the
+#' \code{aTabObject}s.
+#'
+#' @docType methods
+#' @rdname processAllAssays-methods
+#' @exportMethod processAllAssays
+setGeneric("processAllAssays",
+           function(isaObject,
+                    study,
+                    type = c("raw", "derived")) standardGeneric("processAllAssays"))
+
+
+#' @rdname processAssay-methods
+#' @aliases processAllAssays,ISA,processAllAssays-method
+setMethod(f = "processAllAssays",
+          signature = c(isaObject = "ISAjson",
+                        study = "character",
+                        type = "character"),
+          definition = function(isaObject, study, type) {
+            type <- match.arg(type)
+            assayTabs <- getAssayTabs(isaObject)
+            assayTabsStudy <- assayTabs[[study]]
+            assayCont <- lapply(X = assayTabsStudy,
+                                FUN = function(assayTabStudy) {
+                                  processAssay(isaObject, assayTabStudy, type)
+                                })
+            assayContUnlist <- unlist(assayCont, recursive = FALSE)
+            assayContNames <- names(assayContUnlist)
+            allNames <- unique(assayContNames)
+            tst <- sapply(X = allNames, FUN = function(name) {
+              data.table::rbindlist(assayContUnlist[assayContNames == name])
+            }, simplify = FALSE)
+          }
+)
+
 #' Process assay tab data
 #'
-#' Process data from assay tab files
+#' Process data from assay tab file
 #'
 #' @param isaObject An object of the \linkS4class{ISAjson}.
 #' @param aTabObject An object of the \linkS4class{assayTab}.
@@ -61,7 +104,6 @@ setGeneric("processAssay",
                     aTabObject,
                     type = c("raw", "derived")) standardGeneric("processAssay"))
 
-
 #' @rdname processAssay-methods
 #' @aliases processAssay,ISA,assayTab-method
 setMethod(f = "processAssay",
@@ -71,26 +113,37 @@ setMethod(f = "processAssay",
           definition = function(isaObject, aTabObject, type) {
             type <- match.arg(type)
             assayDat <- slot(aTabObject, "aFile")
+            if (type == "derived") {
+              assayDat <- assayDat[assayDat$dataFiletype %in% derivedDataFileCols, ]
+            } else {
+              assayDat <- assayDat[assayDat$dataFiletype %in% rawDataFileCols, ]
+            }
             ## Get file names.
-            datFiles <- file.path(normalizePath(slot(aTabObject, "path"),
-                                                winslash = .Platform$file.sep),
-                                  unique(assayDat[["dataFilename"]]))
+            if (hasName(x = assayDat, "dataFileComment[fullPath]")) {
+              datFiles <- file.path(normalizePath(
+                dirname(slot(aTabObject, "path")), winslash = .Platform$file.sep),
+                unique(assayDat[["dataFileComment[fullPath]"]]))
+            } else {
+              datFiles <- file.path(normalizePath(slot(aTabObject, "path"),
+                                                  winslash = .Platform$file.sep),
+                                    unique(assayDat[["dataFilename"]]))
+            }
             ## Check that files exist.
             missFiles <- datFiles[!file.exists(datFiles)]
             if (length(missFiles) > 0) {
-              stop("The following files are not found:\n",
-                   paste(missFiles, collapse = ", "))
+              datFiles <- setdiff(datFiles, missFiles)
+              if (length(datFiles) > 0) {
+                warning("The following files are not found and skipped:\n",
+                        paste(missFiles, collapse = ", "))
+              } else {
+                stop("The following files are not found:\n",
+                     paste(missFiles, collapse = ", "))
+              }
             }
             ## Read file contents.
             assayContLst <- lapply(X = datFiles, FUN = function(datFile) {
-              tempdf <- utils::read.delim(datFile,
-                                          header = TRUE,
-                                          check.names = FALSE,
-                                          blank.lines.skip = TRUE,
-                                          stringsAsFactors = FALSE,
-                                          fileEncoding = "UTF8")
-              ## Remove empty rows.
-              tempdf <- tempdf[apply(tempdf, 1, function(x) any(nzchar(x))), ]
+              tempdf <- data.table::fread(file.path(datFile), fill = TRUE,
+                                          blank.lines.skip = TRUE)
               ## Remove empty columns.
               # Save and re-add colnames to assure duplicate names are not removed.
               colNames <- colnames(tempdf)
@@ -98,8 +151,8 @@ setMethod(f = "processAssay",
               colnames(tempdf) <- colNames[nzchar(colnames(tempdf))]
               return(tempdf)
             })
-            assayCont <- do.call(rbind, assayContLst)
-            return(assayCont)
+            names(assayContLst) <- basename(datFiles)
+            return(assayContLst)
           }
 )
 

@@ -53,15 +53,15 @@ dataCols <- c("@id",
 
 
 ## Raw Data File Column Names - depend on technology type.
-rawDataFileCols = c(base = "Raw Data File",
-                    microarray = "Array Data File",
-                    ms = "Raw Spectral Data File",
-                    "Free Induction Decay Data File")
+rawDataFileCols <- c(base = "Raw Data File",
+                     microarray = "Array Data File",
+                     ms = "Raw Spectral Data File",
+                     "Free Induction Decay Data File")
 
 ## Derived Data File Column Names - depend on technology type.
-derivedDataFileCols = c(base = "Derived Data File",
-                        microarray = "Derived Array Data File",
-                        ms = "Derived Spectral Data File")
+derivedDataFileCols <- c(base = "Derived Data File",
+                         microarray = "Derived Array Data File",
+                         ms = "Derived Spectral Data File")
 
 ### start technologyTypes list ----
 ## Technology types is a free field.
@@ -372,6 +372,11 @@ parseSamplesLst <- function(dat) {
       if (nrow(sampleCharDat) > 0) {
         sampleDat <- cbind(sampleDat, sampleCharDat)
       }
+      if (!is.null(d$derivesFrom)) {
+        sampleDat$derivesFrom <- sapply(X = d$derivesFrom,
+                                        FUN = function(derives) {
+                                          paste(unlist(derives), collapse = ", ")})
+      }
       if (nrow(sampleDat) > 0) {
         colnames(sampleDat) <- paste0("samples", colnames(sampleDat))
       }
@@ -395,6 +400,11 @@ parseOtherLst <- function(dat) {
       otherCharDat <- parseCharacteristicsLst(d$characteristics)
       if (nrow(otherCharDat) > 0) {
         otherDat <- cbind(otherDat, otherCharDat)
+      }
+      if (!is.null(d$derivesFrom)) {
+        otherDat$derivesFrom <- sapply(X = d$derivesFrom,
+                                       FUN = function(derives) {
+                                         paste(unlist(derives), collapse = ", ")})
       }
       if (nrow(otherDat) > 0) {
         colnames(otherDat) <- paste0("other", colnames(otherDat))
