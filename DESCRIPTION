@@ -22,6 +22,8 @@ Imports:
 Suggests:
     affy,
     Biobase,
-    xcms
+    xcms,
+    knitr,
+    rmarkdown
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr

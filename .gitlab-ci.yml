@@ -12,7 +12,7 @@ before_script:
   - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
   - install2.r devtools remotes
   - r -e 'devtools::install_dev_deps(upgrade = "never")'
-  - r -e 'remotes::install_bioc(c("affy", "Biobase", "xcms"))'
+  - r -e 'remotes::install_bioc(c("affy", "Biobase", "xcms"), upgrade = "never")'
 
 r-release:
   stage: test
