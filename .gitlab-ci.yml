@@ -10,8 +10,9 @@ before_script:
   - apt-get install -y --no-install-recommends ${APT_PKGS}
   - export PATH="/usr/local/lib/R/site-library/littler/examples/:${PATH}"
   - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
-  - install2.r devtools
+  - install2.r devtools remotes
   - r -e 'devtools::install_dev_deps(upgrade = "never")'
+  - r -e 'remotes::install_bioc(c("affy", "Biobase", "xcms"))'
 
 r-release:
   stage: test

@@ -98,6 +98,8 @@ setMethod(f = "processAllAssays",
 #'
 #' @docType methods
 #' @rdname processAssay-methods
+#'
+#' @importFrom utils hasName
 #' @exportMethod processAssay
 setGeneric("processAssay",
            function(isaObject,
