@@ -1,8 +1,14 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+README.Rmd
+^\.github$
 testData
 testScripts
-data-raw
-unused
+^info/
+^cran-comments\.md$
+^CRAN-RELEASE$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
 .gitlab-ci.yml
-undefined.txt
+^CRAN-SUBMISSION$

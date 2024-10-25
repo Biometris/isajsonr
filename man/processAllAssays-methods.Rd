@@ -3,12 +3,19 @@
 \docType{methods}
 \name{processAllAssays}
 \alias{processAllAssays}
+\alias{processAllAssays,ISAjson,character,character-method}
+\alias{processAllAssays,ISA,processAllAssays-method}
 \title{Process all assay tab data}
 \usage{
 processAllAssays(isaObject, study, type = c("raw", "derived"))
+
+\S4method{processAllAssays}{ISAjson,character,character}(isaObject, study, type = c("raw", "derived"))
 }
 \arguments{
 \item{isaObject}{An object of the \linkS4class{ISAjson}.}
+
+\item{study}{A character string indicating for which study the data files
+should be processed.}
 
 \item{type}{A character string indicating which data files should be
 processed, either "raw" for raw data files, or "derived" for derived data

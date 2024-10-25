@@ -48,6 +48,8 @@ getAssayTabs <- function(isaObject) {
 #' \linkS4class{ISAjson}.
 #'
 #' @param isaObject An object of the \linkS4class{ISAjson}.
+#' @param study A character string indicating for which study the data files
+#' should be processed.
 #' @param type A character string indicating which data files should be
 #' processed, either "raw" for raw data files, or "derived" for derived data
 #' files. The file names are taken from the corresponding column in the
@@ -62,7 +64,7 @@ setGeneric("processAllAssays",
                     type = c("raw", "derived")) standardGeneric("processAllAssays"))
 
 
-#' @rdname processAssay-methods
+#' @rdname processAllAssays-methods
 #' @aliases processAllAssays,ISA,processAllAssays-method
 setMethod(f = "processAllAssays",
           signature = c(isaObject = "ISAjson",
