@@ -3,7 +3,7 @@
 
 # isajsonr
 
-[![](https://www.r-pkg.org/badges/version/isajsonr)](https://www.r-pkg.org/pkg/isajsonr)
+[![version](https://www.r-pkg.org/badges/version/isajsonr)](https://www.r-pkg.org/pkg/isajsonr)
 [![CRAN RStudio mirror
 downloads](https://cranlogs.r-pkg.org/badges/isajsonr)](https://www.r-pkg.org/pkg/isajsonr)
 [![R-CMD-check](https://github.com/Biometris/isajsonr/workflows/R-CMD-check/badge.svg)](https://github.com/Biometris/isajsonr/actions?workflow=R-CMD-check)

@@ -27,3 +27,6 @@ Suggests:
     rmarkdown
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
+URL: https://biometris.github.io/isajsonr/index.html, https://github.com/Biometris/isajsonr/
+BugReports: https://github.com/Biometris/isajsonr/issues
+
