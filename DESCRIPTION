@@ -18,15 +18,14 @@ Imports:
     jsonlite,
     jsonvalidate,
     methods
-Suggests:
+Suggests: 
     affy,
     Biobase,
     BiocParallel,
     xcms,
     knitr,
-    rmarkdown
+    rmarkdown, tinytest
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 URL: https://biometris.github.io/isajsonr/index.html, https://github.com/Biometris/isajsonr/
 BugReports: https://github.com/Biometris/isajsonr/issues
-
