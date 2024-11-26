@@ -1,0 +1,183 @@
+---
+title: "An introduction to the isajsonr package"
+author: "Bart-Jan van Rossum"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: false
+    number_sections: true
+bibliography: bibliography.bib
+vignette: >
+  %\VignetteIndexEntry{An introduction to the isajsonr package}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.dim = c(7, 4)
+)
+library(isajsonr)
+op <- options(width = 100)
+```
+
+# The isajsonr package {.unnumbered}
+
+The isajsonr package is developed as a easy-to-use package for reading, modifying and writing files in the Investigation/Study/Assay (ISA) Abstract Model of the metadata framework using the JSON format.
+
+ISA is a metadata framework to manage an increasingly diverse set of life science, environmental and biomedical experiments that employ one or a combination of technologies. Built around the **Investigation** (the project context), **Study** (a unit of research) and **Assay** (analytical measurements) concepts, ISA helps you to provide rich descriptions of experimental metadata (i.e. sample characteristics, technology and measurement types, sample-to-data relationships) so that the resulting data and discoveries are reproducible and reusable.
+
+# The ISA-JSON structure
+
+The ISA-JSON format is described in full detail on [the ISA-JSON website](https://isa-specs.readthedocs.io/en/latest/isajson.html){.uri}.
+
+All ISA-JSON content regarding multiple Study and Assay should fall under one Investigation JSON structure, therefore should be recorded in a single JSON file. The JSON file SHOULD have a .json extension.
+
+## Example data
+
+As an example for working with the `isajsonr` package we will use the data set that accompanies @Castrillo2007. The associated file is included in the package.
+
+# Reading files in the ISA-JSON format
+
+ISA-JSON files can be stored in two different ways, either as stand-alone file in a directory, or as .zip file containing the file. The example data is included as stand-alone file in the package. Both formats can be read into `R` using the `readISAJSON` function.
+
+When reading an ISA-JSON file from a directory, the full location of the file has to be specified. The package will recognize a zipped file and extract it into a temporary folder before reading it.
+
+```{r read}
+## Read ISA-JSON file from directory.
+isaObject1 <- readISAJSON(file = file.path(system.file("extdata/Castrillo/Castrillo.json", 
+                                                       package = "isajsonr")))
+```
+
+In both cases `readISATab` will validate the content of the .json file against the isa-json model scheme which can be found [here](https://github.com/ISA-tools/isa-api/tree/master/isatools/resources/schemas/isa_model_version_1_0_schemas/core). The imported ISA-JSON file is stored in an object of the S4 class `ISAjson`. Since the information is almost identical for reading content from an unzipped and a zipped-file, the following sections will show the example for the files read from an unzipped file only.
+
+# Accessing and updating ISA objects.
+
+All information from the ISA-JSON file is stored within the `content` slot in the `ISAjson` object. The path where the file was originally read from is stored in the `path` slot.
+
+All section in the ISA structure have corresponding functions for accessing and modifying information. The names of these access functions correspond to the section they refer to, e.g. accessing the Ontology Source Reference (OSR) section in an `ISAjson` object can be done using the `oSR()` function. There is one notable exception to this. To prevent problems with the `path()` function, that already exists in quite some other packages, the path slot in an `ISA` object should be accessed using the `isaPath()` function.
+
+```{r pathAccess}
+## Access path for isaObjects
+isaPath(isaObject1)
+```
+
+The path for `isaObject1` shows the full path to the file that was read using `readISAJSON`.
+
+The other sections are accessible in a similar way. Some more examples are shown below.
+
+```{r studyAccess}
+## Access studies.
+isaStudies <- study(isaObject1)
+
+## Print study names.
+names(isaStudies)
+
+## Access study descriptors.
+isaSDD <- sDD(isaObject1)
+
+## Shows study descriptor for study s_BII-S-1.
+isaSDD$`s_BII-S-1.txt`
+```
+
+It is not only possible to access the information in the different sections in an `ISAjson` object, the information can also be updated. As the access functions, the update functions have the same name as the sections they refer to. As an example, let's assume an error sneaked into the OSR section and we want to update one of the source versions.
+
+First have a look at the current content of the OSR section.
+
+```{r osrAccess}
+(isaOSR <- oSR(isaObject1))
+```
+
+Now we update the version of the Ontology for Biomedical Investigations from 47893 to 47894. Then we update the modified ontology source `data.frame` in the `ISAjson` object.
+
+```{r osrUpdate}
+## Update version number.
+isaOSR[1, "version"] <- 47894
+
+## Update oSR in ISAjson object.
+oSR(isaObject1) <- isaOSR
+
+## Check the updated oSR.
+oSR(isaObject1)
+```
+
+In a similar way all sections in an `ISAjson` object can be accessed and updated.
+
+# Processing assay section
+
+The assay section may contain information about the files used to store the actual data for the assay. Per assay section two types of data files may be referred to: 1) the file(s) containing the raw data, and 2) the file(s) containing derived data.
+
+Looking at the assay section in our example data, we see that the `a_proteome` assay in survey `s_BII-S-1` only contains both raw and derived data files, as shown in the dataFileType column in the output.
+
+```{r getAssay}
+## Inspect assay tab for survey s_BII-S-1.
+isaAFile <- aFiles(isaObject1)
+head(isaAFile$`s_BII-S-1.txt`$a_proteome.txt)
+```
+
+To read the contents of the data files, either raw or derived, in the assay tab file, we can use the `processAssay()` function. The exact working of this function depends on the technology type of the assay. For most technology types the data files are read as plain `.txt` files assuming a tab-delimited format. Only for mass spectrometry and microarray data the files are read differently (see the sections below). The protein assignment file in the example above is a regular data file and will be read as such.
+
+Before being able to process the assay file, i.e. read the data, we first have to extract the assay tabs using the `getAssayTabs()` function. This function extracts all the assay files from an `ISAjson` object and stores them as `assayTab` objects. These `assayTab` objects contain not only the content of the assay tab file, but also extra information, e.g. technology type.
+
+```{r procAssay}
+## Get assay tabs for isaObject1.
+aTabObjects <- getAssayTabs(isaObject1)
+aTabObjects$`s_BII-S-1.txt`[[2]]@aFile <- aTabObjects$`s_BII-S-1.txt`[[2]]@aFile[!startsWith(aTabObjects$`s_BII-S-1.txt`[[2]]@aFile$dataFilename, prefix = "/"), ]
+
+## Process assay data.
+isaDat <- processAssay(isaObject = isaObject1,
+                       aTabObject = aTabObjects$`s_BII-S-1.txt`[[2]],
+                       type = "derived")
+ 
+## Display first rows and columns.
+#head(isaDat[, 1:10])
+```
+
+The data is now stored in `isaDat` and can be used for further analysis within `R`.
+
+## Mass spectrometry assay files
+
+Mass spectrometry data is often stored in Network Common Data Form (NetCDF) files, i.e. in .CDF files. Assay data containing these data will be processed in a different way than regular assay data. To be able to do this the [xcms](https://bioconductor.org/packages/release/bioc/html/xcms.html) package is required. This package is available from [Bioconductor](https://bioconductor.org/).
+
+After reading the ISA-Tab files, we can now process the mass spectrometry assay data. In this example the raw data is available, so when processing the assay we specify `type = "raw"`. The rest of the code is similar to the previous section.
+
+```{r processFaahko, message=FALSE, eval=requireNamespace("xcms")}
+## Get assay tabs for isaObject3.
+# aTabObjects3 <- getAssayTabs(isaObject3)
+# 
+# ## Process assay data.
+# isaDat3 <- processAssay(isaObject = isaObject3,
+#                         aTabObject = aTabObjects3$s_Proteomic_profiling_of_yeast.txt$a_metabolite.txt,
+#                         type = "raw")
+# 
+# ## Display output.
+# isaDat3
+```
+
+As the output shows, processing the mass spectrometry data gives an object of class `xcmsSet` from the `xcms` package. This object contains all available information from the .CDF file that was read and can be used for further analysis.
+
+## Microarray assay files
+
+Microarray data is often stored in an Affymetrix Probe Results file. These `.CEL` files contain information on the probe set's intensity values, and a probe set represents a gene. Assay data containing these data will be processed in a different way than regular assay data. To be able to do this the [affy](https://www.bioconductor.org/packages/release/bioc/html/affy.html) package is required. This package is available from [Bioconductor](https://bioconductor.org/).
+
+Processing microarray data is done in a very similar way as processing mass spectrometry data, as described in the previous section. The main difference is that the resulting object will in this case be an object object of class `ExpressionSet`, which is used as input in many Bioconductor packages.
+
+# Writing files in the ISA-JSON format.
+
+After updating an `ISAjson` object, it can be written back to a directory using the `writeISAjson()` function. All content of the `ISAjson` object will be written to a json file following the ISA-JSON standard specifications. The location of the output file is specified in the `file` argument.
+
+```{r write, eval=FALSE}
+## Write content of ISA object to a temporary file.
+writeISAjson(isaObject = isaObject1, 
+             file = tempfile())
+```
+
+```{r winddown, include = FALSE}
+options(op)
+```
+
+------------------------------------------------------------------------
+
+## References

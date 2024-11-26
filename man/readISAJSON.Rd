@@ -4,17 +4,17 @@
 \alias{readISAJSON}
 \title{Read an ISA-JSON file into an R object.}
 \usage{
-readISAJSON(path = getwd(), zipfile = NULL, verbose = FALSE)
+readISAJSON(file, zipfile = NULL, verbose = FALSE)
 }
 \arguments{
-\item{path}{A character vector with the name of the directory in which the
-ISA-JSON file is located (if the parameter zipfile is not provided or if it
+\item{file}{A character string with the name of the ISA-JSON file is located
+(if the parameter zipfile is not provided or if it
 is equal to \code{NULL}), or the name of the directory where the zip archive
 containing the ISA-JSON file is located (if the parameter zipfile is not
-\code{NULL}). The default value is the current working directory.}
+\code{NULL}).}
 
 \item{zipfile}{A character vector with the name of the zip archive containing
-ISA-JSON file itselve (without a directory name in the zip archive). The
+ISA-JSON file itself (without a directory name in the zip archive). The
 default value is \code{NULL} (specifying that the ISA-JSON file has not
 been archived in a zipped file).}
 

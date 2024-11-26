@@ -376,8 +376,9 @@ setMethod("sAssays", "ISAjson", function(x) {
                          sAssaysTechOnt <- parseOntologySource(dat$technologyType,
                                                                name = "technologyType")
                          sAssaysDat <- cbind(sAssaysDat, sAssaysTechOnt)
-                         sAssaysUnitOnt <- parseOntologySourceLst(dat$unitCategories,
-                                                                  name = "unitCategories")
+                         sAssaysUnitOnt <- parseOntologySourceLst(
+                           lapply(X = dat$unitCategories, FUN = function(x) x[1, , drop = FALSE]),
+                                  name = "unitCategories")
                          if (ncol(sAssaysUnitOnt) > 0) {
                            sAssaysDat <- cbind(sAssaysDat, sAssaysUnitOnt)
                          }
@@ -815,7 +816,7 @@ setMethod("aProcSeq<-", "ISAjson", function(x, value) {
 #'
 #' @inheritParams writeISAjson
 #'
-#' @return A named character vector containing the Study File Name(s) and the
+#' @returns A named character vector containing the Study File Name(s) and the
 #' name(s) representing the Study Identifier(s).
 #'
 #' @export
@@ -849,7 +850,7 @@ getStudyFileNames <- function(isaObject) {
 #'
 #' @inheritParams writeISAjson
 #'
-#' @return A named list of character vectors containing the Assay File Name(s)
+#' @returns A named list of character vectors containing the Assay File Name(s)
 #' for each Study Identifier. The name of the character vector or names of the
 #' list elements represent(s) the Study Identifier(s).
 #'
@@ -858,14 +859,14 @@ getAssayFileNames <- function(isaObject) {
   studies <- getStudyFileNames(isaObject)
   assays <- sAssays(isaObject)
   assayNames <- lapply(X = seq_along(studies), FUN = function(i) {
-    lapply(X = seq_along(assays[[i]][["filename"]]), FUN = function(j) {
+    unique(sapply(X = seq_along(assays[[i]][["filename"]]), FUN = function(j) {
       assayName <- assays[[i]][["filename"]][j]
       if (!nzchar(assayName)) {
         paste0("assay", i)
       } else {
         assayName
       }
-    })
+    }))
   })
   names(assayNames) <- studies
   return(assayNames)
@@ -879,7 +880,7 @@ getAssayFileNames <- function(isaObject) {
 #'
 #' @inheritParams writeISAtab
 #'
-#' @return A list of factor lists, where each list element, named by the Study
+#' @returns A list of factor lists, where each list element, named by the Study
 #' Identifier, contains a list of factors specifying the Factor Values used
 #' in a specific Study File linked to the Study Identifier.
 #'

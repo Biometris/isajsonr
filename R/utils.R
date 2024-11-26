@@ -215,7 +215,7 @@ parseOntologySource <- function(dat,
   if (length(dat) == 0) {
     ontAnnotDat <- createEmptyDat(ontologyAnnotationCols)
   } else {
-    ontAnnotDat <- dat[ontologyAnnotationCols]
+    ontAnnotDat <- dat[ontologyAnnotationCols[ontologyAnnotationCols %in% colnames(dat)]]
     ontAnnotComments <- parseComments(ontAnnotDat$comments)
     if (nrow(ontAnnotComments) > 0) {
       ontAnnotDat <- cbind(ontAnnotDat, ontAnnotComments)
@@ -262,6 +262,7 @@ parseOntologySourceLst <- function(dat,
     }
     return(ontDat)
   })
+  ontAnnotLst <- ontAnnotLst[sapply(X = ontAnnotLst, FUN = function(oal) {nrow(oal) > 0})]
   ontAnnotDat <- do.call(cbind, ontAnnotLst)
   return(ontAnnotDat)
 }

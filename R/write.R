@@ -1,19 +1,17 @@
 #' Write ISA-JSON object.
 #'
-#' Write ISA-JSON object to file. The file is written to the folder specified in
-#' \code{path}.
+#' Write ISA-JSON object to file.
 #'
 #' @param isaObject An object of the \linkS4class{ISAjson}.
-#' @param path A character vector with the name of the directory to which the
-#' file(s) should be written. The default value is the current working
-#' directory.
+#' @param file A character string with the name of the file that should be
+#' written.
 #'
-#' @return No return value, files are written to path.
+#' @returns No return value, file is written.
 #'
 #' @export
 writeISAjson <- function(isaObject,
-                         path = getwd()) {
+                         file) {
   jsonlite::write_json(x = isaObject@content,
-                       path = path,
+                       path = file,
                        pretty = TRUE)
 }

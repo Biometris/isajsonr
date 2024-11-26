@@ -4,19 +4,17 @@
 \alias{writeISAjson}
 \title{Write ISA-JSON object.}
 \usage{
-writeISAjson(isaObject, path = getwd())
+writeISAjson(isaObject, file)
 }
 \arguments{
 \item{isaObject}{An object of the \linkS4class{ISAjson}.}
 
-\item{path}{A character vector with the name of the directory to which the
-file(s) should be written. The default value is the current working
-directory.}
+\item{file}{A character string with the name of the file that should be
+written.}
 }
 \value{
-No return value, files are written to path.
+No return value, file is written.
 }
 \description{
-Write ISA-JSON object to file. The file is written to the folder specified in
-\code{path}.
+Write ISA-JSON object to file.
 }

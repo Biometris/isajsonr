@@ -1,6 +1,6 @@
 Package: isajsonr
 Type: Package
-Date: 2023-08-25
+Date: 2024-12-01
 Title: Implementation for the ISA Abstract Model
 Version: 0.0.1
 Description: ISA is a metadata framework to manage an increasingly diverse set 
@@ -13,7 +13,6 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-8673-2514")))
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
 Imports: 
     data.table,
     jsonlite,
@@ -22,6 +21,7 @@ Imports:
 Suggests:
     affy,
     Biobase,
+    BiocParallel,
     xcms,
     knitr,
     rmarkdown

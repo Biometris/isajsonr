@@ -10,7 +10,7 @@
 #'
 #' @param object An object of class \linkS4class{ISAjson}.
 #'
-#' @return TRUE or an error message.
+#' @returns TRUE or an error message.
 #'
 #' @seealso \linkS4class{ISAjson}
 #'

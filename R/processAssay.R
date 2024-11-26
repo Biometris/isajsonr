@@ -4,7 +4,7 @@
 #'
 #' @inheritParams writeISAjson
 #'
-#' @return A list of lists of objects of class \code{\link{assayTab}}, where
+#' @returns A list of lists of objects of class \code{\link{assayTab}}, where
 #' each list element, named by the Study Identifier, contains a list of
 #' objects of class \code{\link{assayTab}}.
 #'
@@ -175,12 +175,13 @@ setMethod(f = "processAssay",
                         aTabObject = "msAssayTab",
                         type = "character"),
           definition = function(isaObject, aTabObject, type) {
-            if (requireNamespace("xcms", quietly = TRUE)) {
+            if (requireNamespace("xcms", quietly = TRUE) &&
+                requireNamespace("BiocParallel", quitely = TRUE)) {
               type <- match.arg(type)
               assayDat <- slot(aTabObject, "aFile")
               spectralDatFiles <-
-                file.path(normalizePath(slot(aTabObject, "path"),
-                                        winslash = .Platform$file.sep),
+                file.path(normalizePath(
+                  dirname(slot(aTabObject, "path")), winslash = .Platform$file.sep),
                           unique(assayDat[["dataFilename"]]))
               ## Check that files exist.
               missFiles <- spectralDatFiles[!file.exists(spectralDatFiles)]
@@ -236,9 +237,9 @@ setMethod(f = "processAssay",
               ## Get microarray files for assay.
               microarrayDatFiles <- unique(assayDat[["dataFilename"]])
               microarrayDatFilesFull <-
-                file.path(normalizePath(slot(aTabObject, "path"),
-                                        winslash = .Platform$file.sep),
-                          microarrayDatFiles)
+                file.path(file.path(normalizePath(
+                  dirname(slot(aTabObject, "path")), winslash = .Platform$file.sep),
+                          microarrayDatFiles))
               ## Check that files exist.
               missFiles <- microarrayDatFilesFull[!file.exists(microarrayDatFilesFull)]
               if (length(missFiles) > 0) {
@@ -271,7 +272,7 @@ setMethod(f = "processAssay",
 #' assay tabs objects. MIAME is a class in the Biobase package for storing
 #' MicroArray Experiment Information.
 #'
-#' @return An object of class \code{MIAME}.
+#' @returns An object of class \code{MIAME}.
 #'
 #' @noRd
 #' @keywords internal
@@ -282,8 +283,8 @@ constructMIAMEMetadata <- function(isaObject,
     if (is(aTabObject, "microarrayAssayTab")) {
       assayDat <- slot(aTabObject, "aFile")
       sIdentifier <- names(slot(aTabObject, "sFilename"))
-      sInfo <- slot(isaObject, "study")[[sIdentifier]]
-      sContacts <- isaObject@sContacts[[sIdentifier]]
+      sInfo <- study(isaObject)[[sIdentifier]]
+      sContacts <- iContacts(isaObject)[[sIdentifier]]
       ## Get corresponding author details.
       sCorr <- sContacts[sContacts[["roles"]] == "corresponding author", ]
       sCorrPers <- as.character(person(given = paste(sCorr[["fistName"]],
